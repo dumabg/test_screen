@@ -1,0 +1,6 @@
+tags:
+  # golden:
+  #   skip: "Skip golden test. To run it: flutter test --run-skipped."
+  screen_ui:
+    skip: "Skip screen UI test. To run it: flutter test --run-skipped."
+  screen:
