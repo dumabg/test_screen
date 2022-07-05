@@ -1,5 +1,5 @@
 name: test_screen
-description: Library for screen UI testing
+description: Library for screen UI testing for multiple locales, platforms and devices and different states of the same screen.
 version: 1.0.0
 homepage: https://github.com/dumabg/test_screen
 

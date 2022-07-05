@@ -29,14 +29,16 @@ abstract class FirebaseTestLab {
   /// Doesn't include in the device list these models.
   final List<String> excludeModels;
 
-  FirebaseTestLab(this._platform, String? cachePath, this.excludeSameLogicalSize, this.excludeModels): 
-    cachePath = cachePath ?? 'test/firebase_test_lab_${_platform}_devices.csv';
+  FirebaseTestLab(this._platform, String? cachePath,
+      this.excludeSameLogicalSize, this.excludeModels)
+      : cachePath =
+            cachePath ?? 'test/firebase_test_lab_${_platform}_devices.csv';
 
   /// List of the devices.
   Future<List<TestScreenDevice>> devices() async {
-    if (_devices.isEmpty) {       
-       await _load();
-    } 
+    if (_devices.isEmpty) {
+      await _load();
+    }
     return _devices;
   }
 
@@ -61,20 +63,17 @@ abstract class FirebaseTestLab {
       String id = values[0];
       var size = Size(double.parse(values[3]), double.parse(values[4]));
       var devicePixelRatio = double.parse(values[5]);
-      bool canAdd =
-        (!excludeModels.contains(id)) &&
-        (
-          ((excludeSameLogicalSize) && (!_existWithLogicalSize(size, devicePixelRatio))) || 
-          (!excludeSameLogicalSize)
-        );
+      bool canAdd = (!excludeModels.contains(id)) &&
+          (((excludeSameLogicalSize) &&
+                  (!_existWithLogicalSize(size, devicePixelRatio))) ||
+              (!excludeSameLogicalSize));
       if (canAdd) {
-      _devices.add(TestScreenDevice(
+        _devices.add(TestScreenDevice(
             id: id,
             manufacturer: values[1],
             name: values[2],
             size: size,
-            devicePixelRatio: devicePixelRatio
-          ));
+            devicePixelRatio: devicePixelRatio));
       }
     }
   }
@@ -88,7 +87,7 @@ abstract class FirebaseTestLab {
     }
     return false;
   }
-  
+
   @protected
   double getDevicePixelRatio(double screenDensity);
 
@@ -116,8 +115,9 @@ abstract class FirebaseTestLab {
       print('-------------------------------------');
       try {
         final screenX = double.parse(getProperty(modelDesc, 'screenX'));
-        final screenY = double.parse(getProperty(modelDesc, 'screenY'));        
-        final devicePixelRatio = getDevicePixelRatio(double.parse(getProperty(modelDesc, 'screenDensity')));
+        final screenY = double.parse(getProperty(modelDesc, 'screenY'));
+        final devicePixelRatio = getDevicePixelRatio(
+            double.parse(getProperty(modelDesc, 'screenDensity')));
         _devices.add(TestScreenDevice(
             id: getProperty(modelDesc, 'id'),
             manufacturer: getManufacturer(modelDesc),
@@ -170,22 +170,30 @@ abstract class FirebaseTestLab {
 }
 
 class _AndroidFirebaseTestLab extends FirebaseTestLab {
-  _AndroidFirebaseTestLab({String? cachePath, bool excludeSameLogicalSize = true, List<String> excludeModels = const []}) : 
-    super('android', cachePath, excludeSameLogicalSize, excludeModels);
+  _AndroidFirebaseTestLab(
+      {String? cachePath,
+      bool excludeSameLogicalSize = true,
+      List<String> excludeModels = const []})
+      : super('android', cachePath, excludeSameLogicalSize, excludeModels);
 
   @override
   double getDevicePixelRatio(double screenDensity) => screenDensity / 160.0;
 
   @override
-  String getManufacturer(String modelDesc) => getProperty(modelDesc, 'manufacturer');
+  String getManufacturer(String modelDesc) =>
+      getProperty(modelDesc, 'manufacturer');
 }
 
 class _IosFirebaseTestLab extends FirebaseTestLab {
-  _IosFirebaseTestLab({String? cachePath, bool excludeSameLogicalSize = true, List<String> excludeModels = const []}) : 
-    super('ios', cachePath, excludeSameLogicalSize, excludeModels);
+  _IosFirebaseTestLab(
+      {String? cachePath,
+      bool excludeSameLogicalSize = true,
+      List<String> excludeModels = const []})
+      : super('ios', cachePath, excludeSameLogicalSize, excludeModels);
 
   @override
-    double getDevicePixelRatio(double screenDensity) => (screenDensity / 160.0).roundToDouble();
+  double getDevicePixelRatio(double screenDensity) =>
+      (screenDensity / 160.0).roundToDouble();
 
   @override
   String getManufacturer(String modelDesc) => 'Apple';
@@ -199,11 +207,17 @@ class AndroidFirebaseTestLab {
   /// [excludeSameLogicalSize] If a device is find with the same logical size than another device that
   /// already exists in the devices list, it is ignored.
   /// [excludeModels] Doesn't include in the device list these models.
-  AndroidFirebaseTestLab({String? cachePath, bool excludeSameLogicalSize = true, List<String> excludeModels = const []}):
-    _instance = _AndroidFirebaseTestLab(cachePath: cachePath, excludeModels: excludeModels, excludeSameLogicalSize: excludeSameLogicalSize);  
+  AndroidFirebaseTestLab(
+      {String? cachePath,
+      bool excludeSameLogicalSize = true,
+      List<String> excludeModels = const []})
+      : _instance = _AndroidFirebaseTestLab(
+            cachePath: cachePath,
+            excludeModels: excludeModels,
+            excludeSameLogicalSize: excludeSameLogicalSize);
 
   /// The list of Android devices defined in Firebase Test labs.
-  Future<List<TestScreenDevice>> devices() async => _instance.devices();   
+  Future<List<TestScreenDevice>> devices() async => _instance.devices();
 }
 
 /// Recover the list of iOS devices that are defined in Firebase Test Lab.
@@ -214,9 +228,15 @@ class IosFirebaseTestLab {
   /// [excludeSameLogicalSize] If a device is find with the same logical size than another device that
   /// already exists in the devices list, it is ignored.
   /// [excludeModels] Doesn't include in the device list these models.
-  IosFirebaseTestLab({String? cachePath, bool excludeSameLogicalSize = true, List<String> excludeModels = const []}):
-    _instance = _IosFirebaseTestLab(cachePath: cachePath, excludeModels: excludeModels, excludeSameLogicalSize: excludeSameLogicalSize);  
+  IosFirebaseTestLab(
+      {String? cachePath,
+      bool excludeSameLogicalSize = true,
+      List<String> excludeModels = const []})
+      : _instance = _IosFirebaseTestLab(
+            cachePath: cachePath,
+            excludeModels: excludeModels,
+            excludeSameLogicalSize: excludeSameLogicalSize);
 
   /// The list of iOS devices defined in Firebase Test labs.
-  Future<List<TestScreenDevice>> devices() async => _instance.devices();   
+  Future<List<TestScreenDevice>> devices() async => _instance.devices();
 }
