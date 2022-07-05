@@ -1,0 +1,8 @@
+{
+  "@@locale": "en",
+
+  "title": "test_screen main page",
+  "message": "You have pushed the button this many times:",
+
+  "title_multiplatform": "Multiplatform"
+}

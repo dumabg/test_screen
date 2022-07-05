@@ -1,27 +1,56 @@
+// Copyright 2022 Miguel Angel Besalduch Garcia, mabg.dev@gmail.com. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:intl/intl.dart';
-//import 'package:intl/intl.dart';
+import 'package:meta/meta.dart';
 import 'dart:ui' as ui;
 import 'test_screen_config.dart';
 import 'stack_trace_source.dart';
-import 'package:meta/meta.dart';
 
+
+/// It does exactly the same than [testScreenUI], but doesn't do the 
+/// golden files bitmap comparation.
+///
+/// Every time the test is executed, the screen created by the test
+/// is compared with the png file of the golden dir. This consumes a lot of time. 
+/// [testScreen] doesn't do this comparation.
 @isTestGroup
-void testScreen(String description, Future<Widget> Function() createScreen,
-    Future<void> Function(WidgetTester tester) onTest,
-    {TestScreenConfig? config, TargetPlatform? onlyPlatform}) {
+void testScreen(
+    Object description,
+    Future<Widget> Function() createScreen,
+    Future<void> Function(
+            WidgetTester tester)
+        onTest,
+    {TestScreenConfig? config,
+    TargetPlatform? onlyPlatform}) {
   _internalTestScreen(description, createScreen, onTest,
       config: config, onlyPlatform: onlyPlatform, testUI: false);
 }
 
+
+/// Use this function for testing custom [StatelessWidget]s and
+/// [StatefulWidget]s that represent screens.
+///
+/// [description] is a test description.
+/// [createScreen] is a callback function that creates the screen to test.
+/// [onTest] is a callback function called after the screen creation.
+/// Use it to change the state of your screen.
+/// [goldenDir] is the name of the subdirectory created inside the screens directory
+/// when the golden files are created.
+/// [config] use this config instead of the global configuration defined by [initializeDefaultTestScreenConfig].
+/// [onlyPlatform] execute the tests only for the platform specified, ignorig the specified
+/// on [config] or [initializeDefaultTestScreenConfig].
 @isTestGroup
-void testScreenUI(String description, Future<Widget> Function() createScreen,
-    {Future<void> Function(WidgetTester tester)? onTest,
+void testScreenUI(Object description, Future<Widget> Function() createScreen,
+    {Future<void> Function(
+            WidgetTester tester)? onTest,
     String? goldenDir,
     TestScreenConfig? config,
     TargetPlatform? onlyPlatform}) async {
@@ -32,8 +61,9 @@ void testScreenUI(String description, Future<Widget> Function() createScreen,
       uiGolderDir: goldenDir);
 }
 
+@isTestGroup
 void _internalTestScreen(
-    String description,
+    Object description,
     Future<Widget> Function() createScreen,
     Future<void> Function(WidgetTester tester)? onTest,
     {TestScreenConfig? config,
@@ -55,53 +85,67 @@ void _internalTestScreen(
     }
   }
   TestWidgetsFlutterBinding.ensureInitialized();
+  bool oldDebugDisableShadows = debugDisableShadows;
   group(description, () {
     for (final TargetPlatform platform in platforms) {
-      final String platformString =
-          platform.toString().substring('TargetPlatform.'.length);
-      group(platformString, () {
-        final List<TestScreenDevice>? devices = platformDevices[platform];
-        if (devices != null) {
-          for (final String locale in config!.locales) {
+      final List<TestScreenDevice>? devices = platformDevices[platform];
+      if ((devices == null) || (devices.isEmpty)) {        
+        // ignore: avoid_print
+        print('No devices for $platform');
+      } else {
+        final String platformString =
+            platform.toString().substring('TargetPlatform.'.length);
+        group(platformString, () {
+          for (final String localeName in config!.locales) {
             for (final TestScreenDevice device in devices) {
-              group(locale, () {
-                String name = device.name;
-                testWidgets(name, (WidgetTester tester) async {
-                  Intl.defaultLocale = locale;
-                  await tester.binding.setSurfaceSize(device.size);
-                  await tester.binding.setLocale(locale, '');
+              group(localeName, () {
+                String name = '${device.id}: ${device.manufacturer} ${device.name}';
+                testWidgets(name, (WidgetTester tester) async {                  
+                  debugDefaultTargetPlatformOverride = platform;
+                  TestWindow testWindow = tester.binding.window;
+                  testWindow.physicalSizeTestValue = device.size / device.devicePixelRatio;
+                  testWindow.devicePixelRatioTestValue = 1.0;                  
+                  var locale = Locale(localeName);
+                  testWindow.platformDispatcher.localesTestValue = [locale];
+                  testWindow.platformDispatcher.localeTestValue = locale;
 
-                  await config!.onBeforeCreate?.call(locale, platform);
-                  final Widget screen = await createScreen();
+                  await config!.onBeforeCreate?.call(tester);
+                  final Widget screen = await createScreen();                  
                   await tester.pumpWidget(
-                      config.wrapper?.call(screen, locale, platform) ?? screen);
+                      config.wrapper?.call(screen) ?? screen);
                   await config.onAfterCreate?.call(tester, screen);
                   await tester.pumpAndSettle();
                   await _loadImages(tester);
                   await tester.pumpAndSettle();
-                  if (testUI) {
-                    final String goldenFileName =
-                        '$rootGoldenDir${platformString}_${locale}_$name.png';
-                    await expectLater(find.byWidget(screen),
-                        matchesGoldenFile(goldenFileName));
-                  }
                   try {
                     await onTest?.call(tester);
                   } catch (e, stack) {
                     // ignore: avoid_print
                     print(
-                        'Platform: $platformString. Locale: $locale. Device: ${device.name}.');
+                        'Platform: $platformString. Locale: $localeName. Device: ${device.name}.');
                     await _testFailure(tester, screen, stack);
                     rethrow;
                   }
+                  if (testUI) {
+                    final String filenamePrefix = uiGolderDir == null ? '' : '${uiGolderDir}_';
+                    final String goldenFileName =
+                        '$rootGoldenDir$filenamePrefix${platformString}_${localeName}_${device.id}.png';
+                    await expectLater(find.byWidget(screen),
+                        matchesGoldenFile(goldenFileName));
+                  }
+                  testWindow.platformDispatcher.clearLocaleTestValue();
+                  testWindow.clearPhysicalSizeTestValue();
+                  testWindow.clearDevicePixelRatioTestValue();
+                  debugDefaultTargetPlatformOverride = null;             
                 }, tags: [testUI ? 'screen_ui' : 'screen']);
               });
             }
           }
-        }
-      });
-    }
+        });
+      }
+    }    
   });
+  debugDisableShadows = oldDebugDisableShadows;
 }
 
 Future<void> _testFailure(

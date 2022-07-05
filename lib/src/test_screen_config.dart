@@ -1,34 +1,78 @@
+// Copyright 2022 Miguel Angel Besalduch Garcia, mabg.dev@gmail.com. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'font_loader.dart';
 
+/// A font used in the test.
 class TestScreenFont {
   final String family;
   final String fileName;
   const TestScreenFont(this.family, this.fileName);
 }
 
+/// Definition of a device for testing.
 class TestScreenDevice {
+  /// Device id
+  final String id;
+  /// Manufacturer name
+  final String manufacturer;
+  /// Device model name
   final String name;
+  /// Physical device size
   final Size size;
-  final EdgeInsets safeArea;
+  /// Device pixel ratio
+  final double devicePixelRatio;
 
   const TestScreenDevice(
-      {required this.name,
+      {required this.id,
+      required this.manufacturer,
+      required this.name,
       required this.size,
-      this.safeArea = const EdgeInsets.all(0)});
+      required this.devicePixelRatio});
 }
 
+/// Configuration for screen tests.
+/// [locales] a list of locales to test.
+/// 
+/// [devices] a list of [TestScreenDevice] to test by platform.
+/// 
+/// [wrapper] is a parent widget needed for the screen to run.
+/// For example, a [MaterialApp]:
+/// ```dart
+///   wrapper: (Widget screen) =>
+///      MaterialApp(
+///        debugShowCheckedModeBanner: false,
+///        home: screen,
+///        localizationsDelegates: AppLocalizations.localizationsDelegates,
+///        supportedLocales: AppLocalizations.supportedLocales,
+/// )));
+/// ```
+/// 
+/// The screen widget to test is created in this order: first [onBeforeCreate] is called. 
+/// Next is called the [createScreen] callback defined on the test. Next is
+/// called [wrapper] for wrapping the created screen and finally [onAfterCreate] is called.
 class TestScreenConfig {
+
+  /// List of locales to test
   final List<String> locales;
+
+  /// List of [TestScreenDevice] to test by platform.
   final Map<TargetPlatform, List<TestScreenDevice>> devices;
-  final Widget Function(
-      Widget screen, String locale, TargetPlatform targetPlatform)? wrapper;
+
+  /// Wrapper widget for the screen created.
+  final Widget Function(Widget screen)? wrapper;
+
+  /// Callback called after the screen widget creation.
   final Future<void> Function(WidgetTester tester, Widget screen)?
       onAfterCreate;
-  final Future<void> Function(String locale, TargetPlatform targetPlatform)?
+
+  /// Callback called before the screen widget creation.
+  final Future<void> Function(WidgetTester tester)?
       onBeforeCreate;
 
   TestScreenConfig(
@@ -41,8 +85,14 @@ class TestScreenConfig {
         assert(devices.isNotEmpty);
 }
 
+/// Default [TestScreenConfig] for all the screen tests.
 TestScreenConfig? defaultTestScreenConfig;
 
+/// Initialize the default configuration for all the screen tests.
+/// [fonts] are a list of fonts to use in the screen test.
+/// [loadDefaultFonts] loads all the fonts that you have on your project,
+/// aditionally test_screen have a Roboto font for Android and a SFProDisplay-Regular
+/// and  SFProText-Regular for iOS.
 Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
     {List<TestScreenFont> fonts = const [],
     bool loadDefaultFonts = true}) async {
@@ -62,36 +112,4 @@ Future<void> _loadTestFont(String family, String fileName) async {
   // fontLoader.addFont(Future.value(ByteData.view(data)));
   fontLoader.addFont(rootBundle.load(fileName));
   await fontLoader.load();
-}
-
-List<TestScreenDevice> androidDevicesFromFirebaseTestLab(List<String> lines,
-    {bool includeEmulatorForm = false,
-    bool includePhysicalForm = true,
-    bool includeVirtualForm = true,
-    List<String> excludeModels = const []}) {
-  List<TestScreenDevice> result = [];
-  List<Size> sizes = [];
-  // 3 rows header, 1 row footer
-  for (int i = 3; i < lines.length - 1; i++) {
-    String line = lines[i];
-    List<String> columns = line.split('│');
-    String form = columns[4].trim();
-    if ((includePhysicalForm && form.contains('PHYSICAL')) ||
-        (includeVirtualForm && form.contains('VIRTUAL')) ||
-        (includeEmulatorForm && form.contains('EMULATOR'))) {
-      String model = columns[1].trim();
-      if (!excludeModels.contains(model)) {
-        List<String> sSize = columns[5].split('x');
-        Size size = Size(double.parse(sSize[0]), double.parse(sSize[1]));
-        // Only add devices with diferent sizes
-        if (!sizes.contains(size)) {
-          sizes.add(size);
-          result.add(TestScreenDevice(
-              name: '${columns[2].trim()} ${columns[3].trim()} ($model)',
-              size: size));
-        }
-      }
-    }
-  }
-  return result;
 }

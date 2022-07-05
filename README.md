@@ -1,50 +1,71 @@
 # Test Screen
 
-<!-- [![Pub version](https://img.shields.io/pub/v/golden_toolkit.svg)](https://pub.dev/packages/test_screen) [![Build Status](https://travis-ci.org/eBay/flutter_glove_box.svg?branch=master)](https://travis-ci.org/eBay/flutter_glove_box) [![codecov](https://codecov.io/gh/eBay/flutter_glove_box/branch/master/graph/badge.svg)](https://codecov.io/gh/eBay/flutter_glove_box) -->
+ [![Pub version](https://img.shields.io/pub/v/messaging_service.svg)](https://pub.dev/packages/messaging_service) [![codecov](https://codecov.io/gh/eBay/flutter_glove_box/branch/master/graph/badge.svg)](https://codecov.io/gh/eBay/flutter_glove_box)
 
 This project contains APIs and utilities that build upon [Flutter's Golden test](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter) functionality to provide powerful UI regression tests.
 
 <!-- It is highly recommended to look at sample tests here: [golden_builder_test.dart](test/golden_builder_test.dart) -->
 
-It was inspired by the great toolkit [Golden Toolkit](https://pub.dev/packages/golden_toolkit).
-
-## Status
-- Testing the library in real projects
-- Doing this readme documentation
-- Creating an example project
-- Documenting classes
-
-## Table of Contents
-
-- [Test Screen](#test-screen)
-  - [Status](#status)
-  - [Table of Contents](#table-of-contents)
-  - [Getting Started](#getting-started)
-    - [Setup](#setup)
-      - [Add the failures and screens folder to .gitignore](#add-the-failures-and-screens-folder-to-gitignore)
-      - [Add a "screen" and "screen_ui" tag to your project](#add-a-screen-and-screen_ui-tag-to-your-project)
-      - [Configure VS Code](#configure-vs-code)
-  - [Creating screen tests](#creating-screen-tests)
-    - [Global configuration](#global-configuration)
-      - [Adding Android devices from Firebase Test Lab](#adding-android-devices-from-firebase-test-lab)
-      - [Other options of TestScreenConfig](#other-options-of-testscreenconfig)
-
-## Getting Started
-
 _A Note on Golden Testing:_
 
 Goldens aren't intended to be a replacement of typical behavioral widget testing that you should perform. What they provide is an automated way to provide regression testing for all of the visual details that can't be validated without manual verification.
 
-The Golden assertions take longer to execute than traditional widget tests, so it is recommended to be intentional about when they are used. Additionally, they can have many reasons to change. Often, the primary reason a golden test will fail is becaue of an intentional change. Thankfully, Flutter makes it easy to regenerate new reference images.
+The Golden assertions take longer to execute than traditional widget tests, so it is recommended to be intentional about when they are used. Additionally, they can have many reasons to change. Often, the primary reason a golden test will fail is because of an intentional change. Thankfully, Flutter makes it easy to regenerate new reference images.
 
+## Table of Contents
+
+<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+
+<!-- code_chunk_output -->
+
+- [Test Screen](#test-screen)
+  - [Table of Contents](#table-of-contents)
+  - [How it works?](#how-it-works)
+  - [Getting Started](#getting-started)
+    - [Setup](#setup)
+      - [Add the failures and screens directories to .gitignore](#add-the-failures-and-screens-directories-to-gitignore)
+      - [Add a "screen" and "screen_ui" tag to your project](#add-a-screen-and-screen_ui-tag-to-your-project)
+      - [Configure VS Code](#configure-vs-code)
+  - [Creating screen tests](#creating-screen-tests)
+    - [Global configuration](#global-configuration)
+      - [Adding Android / iOS devices from Firebase Test Lab](#adding-android--ios-devices-from-firebase-test-lab)
+      - [Other TestScreenConfig parameters](#other-testscreenconfig-parameters)
+      - [Platform vs ThemeData.platform](#platform-vs-themedataplatform)
+        - [When use Platform and when ThemeData.platform?](#when-use-platform-and-when-themedataplatform)
+    - [Create screen tests](#create-screen-tests)
+  - [3rd Party Software Included or Modified in Project](#3rd-party-software-included-or-modified-in-project)
+
+<!-- /code_chunk_output -->
+## How it works?
+
+First, you define globally the locales, platforms and devices for your UI tests.
+
+For every UI test, a concrete test for every platform, every locale and every device defined in the configuration will be created. On VSC is viewed like a group of platforms, with a group of locales and a test for every device:
+
+![Screenshot of testing iOS on VSC](resources/how_work_vsc.png)
+![Screenshot of testing Android on VSC](resources/how_work_vsc_android.png)
+
+Before run the tests the first time, you must create the screens (golden files) that will be used like the reference for determining that the UI tests are correct. You do this with a command from the terminal or, if VSC is configured, directly from VSC. This creates on the directory, where the tests are created, a directory with the name `screens`:
+
+![Screenshot of screens dirs](resources/how_work_screens_dir.png)
+
+Inside that directory, the golden files will be created:
+
+![Screenshot of screens files](resources/how_work_screens_files.png)
+
+That's all. When the test runs, it compares the screen generated by the tests with these golden files. If something are different, the test fails.
+
+If the test fail, a `failures` directory will be created with the fail information. 
+
+## Getting Started
 
 ### Setup
 
-If you are new to Flutter's Golden testing, there are a few things you might want to do
+If you are new to Flutter's Golden testing, there are a few things you might want to do.
 
-#### Add the failures and screens folder to .gitignore
+#### Add the failures and screens directories to .gitignore
 
-When golden tests fail, artifacts are generated in a `failures` folder adjacent to your test. These are not intended to be tracked in source control.
+When golden tests fail, artifacts are generated in a `failures` directory adjacent to your test. These are not intended to be tracked in source control.
 
 ```
 .gitignore
@@ -52,7 +73,7 @@ When golden tests fail, artifacts are generated in a `failures` folder adjacent 
 test/**/failures
 ```
 
-If you don't want to track the generated screens, add the `screens` folder too:
+If you don't want to track the generated screens, add the `screens` directory too:
 
 ```
 .gitignore
@@ -103,8 +124,8 @@ This give you a context menu where you can easily regenerate the screens for a p
 
 ## Creating screen tests
 Creating screen tests are divided in two steps:
-- Create a global configuration of locales and devices to test 
-- Write the concrete screen tests.
+- Create a global configuration of platforms, locales and devices for testing.
+- [Create screen tests](#create-screen-tests).
 
 ### Global configuration
 Initialize the global configuration in the `flutter_test_config.dart` file.
@@ -130,11 +151,26 @@ Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
       ],
       devices: {
         TargetPlatform.android: [
-          const TestScreenDevice(name: 'Samsung Galaxy S2', size: Size(1200, 1600)),
-          const TestScreenDevice(name: 'Huawei AME-LX1', size: Size(1080, 2280)),
-        ],
+            const TestScreenDevice(
+              id: 'S2',
+              manufacturer: 'Samsung',
+              name: 'Galaxy S2',
+              size: Size(1200, 1600),
+              devicePixelRatio: 1.0),
+           const TestScreenDevice(
+              id: 'LX1',
+              manufacturer: 'Huawei',
+              name: 'AME-LX1',
+              size: Size(1080, 2280),
+              devicePixelRatio: 2.0),
+            ],
         TargetPlatform.iOS: [
-          const TestScreenDevice(name: 'iPhone 8', size: Size(1334, 750)),
+          const TestScreenDevice(
+              id: 'i8',
+              manufacturer: 'Apple',
+              name: 'iPhone 8',
+              size: Size(1334, 750),
+              devicePixelRatio: 2.0),
         ]
       }
     )
@@ -152,36 +188,44 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
       ],
       devices: {
         TargetPlatform.android: [
-          const TestScreenDevice(name: 'Samsung Galaxy S2', size: Size(1200, 1600)),
-          const TestScreenDevice(name: 'Huawei AME-LX1', size: Size(1080, 2280)),
-        ],
+            const TestScreenDevice(
+              id: 'S2',
+              manufacturer: 'Samsung',
+              name: 'Galaxy S2',
+              size: Size(1200, 1600),
+              devicePixelRatio: 1.0),
+           const TestScreenDevice(
+              id: 'LX1',
+              manufacturer: 'Huawei',
+              name: 'AME-LX1',
+              size: Size(1080, 2280),
+              devicePixelRatio: 2.0),
+            ],
         TargetPlatform.iOS: [
-          const TestScreenDevice(name: 'iPhone 8', size: Size(1334, 750)),
+          const TestScreenDevice(
+              id: 'i8',
+              manufacturer: 'Apple',
+              name: 'iPhone 8',
+              size: Size(1334, 750),
+              devicePixelRatio: 2.0),
         ]
       }));
   return testMain();
 }
 ```
-#### Adding Android devices from Firebase Test Lab
-The `androidDevicesFromFirebaseTestLab` utility function allow to import the Android devices defined in Firebase Test Lab. This function parses the output of Firebase CLI that lists Android devices.
+#### Adding Android / iOS devices from Firebase Test Lab
+The `AndroidFirebaseTestLab` and `IosFirebaseTestLab` classes allow to import the Android and iOS devices defined in Firebase Test Lab. The method `devices()` returns the list of devices.
 
-It is done in two steps:
-- Generate the list from Firebase CLI in a file.
-- Modify `TestScreenConfig` using `androidDevicesFromFirebaseTestLab`.
+The first time, `AndroidFirebaseTestLab` and `IosFirebaseTestLab` connects to Firebase Test Lab and downloads the Android and iOS models definitions, creating a cache file named `firebase_test_lab_android_devices.csv` or `firebase_test_lab_ios_devices.csv`. By default, it is created on `test` directory. You can change the default path in a constructor argument.
 
-Generating the list:
+They use `gcloud` CLI tools, so it's necessary to be installed and logged.
 
-Execute `gcloud firebase test android models list` and redirect the output to a file: `gcloud firebase test android models list > firebase_lab_android.txt`
-
-Copy the file on `test` directory.
-
-Modify TestScreenConfig:
+After the cache file is created, `AndroidFirebaseTestLab` and `IosFirebaseTestLab` always use it, and never connects again to Firebase Test Lab. If you don't want to test some model, open the cache file `firebase_test_lab_android_devices.csv` or `firebase_test_lab_ios_devices.csv` and delete the row that contains the model definition. Delete the cache file for recreating it.
+  
+Use `AndroidFirebaseTestLab` and `IosFirebaseTestLab` in `initializeDefaultTestScreenConfig`:
 
 ```dart
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
-  List<String> lines =
-      File('/<absolute path project>/test/firebase_lab_android.txt')
-          .readAsLinesSync();
 
   initializeDefaultTestScreenConfig(TestScreenConfig(
       locales: [
@@ -190,15 +234,118 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
         'en'
       ],
       devices: {
-        TargetPlatform.android: androidDevicesFromFirebaseTestLab(lines),
+        TargetPlatform.android: await AndroidFirebaseTestLab().devices(),
+        TargetPlatform.iOS: await IosFirebaseTestLab().devices(),
       },
       ...
 
 ```
 
-To avoid absolute path problems, it's a better approach to create a const variable with the content of the file. See `test/android_devices_from_firebase_test_lab_test.dart`.
+In the example project, in the `test` directory, you can find the `firebase_test_lab_android_devices.csv` and `firebase_test_lab_ios_devices.csv` files generated when the tests for example project was executed. If prefer, you can use it.
 
-If `androidDevicesFromFirebaseTestLab` found devices with the same size, it only creates the configuration for the first one. See the named parameters for other options.
 
-#### Other options of TestScreenConfig
-... Doing
+#### Other TestScreenConfig parameters
+For every test, `onBeforeCreate`, `wrapper` and `onAfterCreate` are called.
+The screen widget to test is created in this order: first `onBeforeCreate` is called. Next is called the `createScreen` callback defined on the test. Next is called `wrapper` for wrapping the created screen and finally `onAfterCreate` is called.
+
+If your screen widget needs a parent for running, like `MaterialApp`, use the `wrapper` parameter. The `wrapper` method will be called with the widget screen to test.
+
+```dart
+    wrapper: (Widget screen) =>
+          MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              primarySwatch: Colors.blue,
+            ),
+            home: screen,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+          )));
+```
+
+#### Platform vs ThemeData.platform
+If uses `Platform` for some specific platform code, the code is only testable in that platform.
+
+For example, if the test are running on linux and is doing tests for Android app, Platform.isAndroid returns false. 
+
+```dart
+@override
+Widget build(BuildContext context) {
+  if (Platform.isAndroid) 
+    return buildRaisedButton();
+  else if (Platform.isIOS)
+    return buildCupertinoButton();
+  else 
+    throw UnsupportedError('Only Android and iOS are supported.');
+}
+```
+
+To avoid this problem, use `ThemeData.platform`:
+
+```dart
+@override
+Widget build(BuildContext context) {
+  final platform = Theme.of(context).platform;
+
+  if (platform == TargetPlatform.iOS) 
+    return buildCupertinoButton();
+  else 
+    ...
+}
+```
+See an example on `lib/screens/multi_platform/multi_platform_screen.dart` on the example project. 
+
+
+##### When use Platform and when ThemeData.platform?
+
+Use `Platform` when your code depends on some specific platform functionality. Keep in mind that this code is only testable in that platform.
+
+Use `ThemeData.platform` if the code runs on all platforms, but only adapts depends on the platform. For example on the previous UI example.
+
+
+### Create screen tests
+
+_See the example project_
+
+Use `testScreenUI` for creating UI tests. You must pass a description and a callback to an async function that creates your screen.
+```dart
+void main() {
+  group('Home Screen', () {
+    testScreenUI('Init state', () async => const HomeScreen());
+    ...
+```
+
+Before run the test the first time, you must create the golden files (see [How it works?](#how-it-works)).
+
+Normally you want to test your screen in different states. Different states generates differents screens. To allow this, `testScreenUI` has the optional parameter `goldenDir`. This parameter creates a subdirectory inside the screens directory, allowing to separate the different screens for every state.
+
+For example, in the example project, the Home screen is tested in 2 different states, when the screen appears and after the user pushes the button three times:
+
+```dart
+void main() {
+  group('Home Screen', () {
+
+    testScreenUI('Init state', () async => const HomeScreen(),
+      goldenDir: 'init_state');
+  
+    testScreenUI('Pushed button 3 times', () async => const HomeScreen(),
+      goldenDir: 'pushed_3',
+      onTest: (WidgetTester tester) async {
+        for (int i = 0; i < 3; i++) {
+          await tester.tap(find.byType(FloatingActionButton));
+          await tester.pump();
+        }
+      });
+  });
+}
+```
+You could see than `testScreenUI` have different goldenDir arguments. The test `Init state` creates the golden files in the `init_state` subdirectory and the test `Pushed button 3 times` in the `pushed_3` subdiretory:
+
+![Screenshot of golden dir subdirectories](resources/create_test_golden_dir.png)
+
+Every time the test is executed, the screen created by the test is compared with the png file of the golden dir. This consumes a lot of time. You can avoid this comparation using `testScreen`. It does exactly the same than `testScreenUI`, but doesn't do the bitmap comparation.
+
+## 3rd Party Software Included or Modified in Project
+  - font_loader.dart from Goolden Toolkit: https://pub.dev/packages/golden_toolkit
+  - Roboto Font File: Available at URL: https://github.com/google/fonts/tree/master/apache/roboto License: Available under Apache license at https://github.com/google/fonts/blob/master/apache/roboto/LICENSE.txt
+  - SFProDisplay and SFProText Font Files: Available at URL: https://fontsfree.net

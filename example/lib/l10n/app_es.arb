@@ -1,0 +1,8 @@
+{
+  "@@locale": "es",
+
+  "title": "página principal de test_screen",
+  "message": "Has pulsado el botón este número de veces:",
+
+  "title_multiplatform": "Multiplataforma"
+}
