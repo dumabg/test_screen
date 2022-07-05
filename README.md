@@ -1,6 +1,6 @@
 # Test Screen
 
- [![Pub version](https://img.shields.io/pub/v/messaging_service.svg)](https://pub.dev/packages/messaging_service) [![codecov](https://codecov.io/gh/eBay/flutter_glove_box/branch/master/graph/badge.svg)](https://codecov.io/gh/eBay/flutter_glove_box)
+ [![Pub version](https://img.shields.io/pub/v/test_screen.svg)](https://pub.dev/packages/test_screen)
 
 This project contains APIs and utilities that build upon [Flutter's Golden test](https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter) functionality to provide powerful UI regression tests.
 
