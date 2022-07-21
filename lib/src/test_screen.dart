@@ -14,26 +14,19 @@ import 'dart:ui' as ui;
 import 'test_screen_config.dart';
 import 'stack_trace_source.dart';
 
-
-/// It does exactly the same than [testScreenUI], but doesn't do the 
+/// It does exactly the same than [testScreenUI], but doesn't do the
 /// golden files bitmap comparation.
 ///
 /// Every time the test is executed, the screen created by the test
-/// is compared with the png file of the golden dir. This consumes a lot of time. 
+/// is compared with the png file of the golden dir. This consumes a lot of time.
 /// [testScreen] doesn't do this comparation.
 @isTestGroup
-void testScreen(
-    Object description,
-    Future<Widget> Function() createScreen,
-    Future<void> Function(
-            WidgetTester tester)
-        onTest,
-    {TestScreenConfig? config,
-    TargetPlatform? onlyPlatform}) {
+void testScreen(Object description, Future<Widget> Function() createScreen,
+    Future<void> Function(WidgetTester tester) onTest,
+    {TestScreenConfig? config, TargetPlatform? onlyPlatform}) {
   _internalTestScreen(description, createScreen, onTest,
       config: config, onlyPlatform: onlyPlatform, testUI: false);
 }
-
 
 /// Use this function for testing custom [StatelessWidget]s and
 /// [StatefulWidget]s that represent screens.
@@ -49,8 +42,7 @@ void testScreen(
 /// on [config] or [initializeDefaultTestScreenConfig].
 @isTestGroup
 void testScreenUI(Object description, Future<Widget> Function() createScreen,
-    {Future<void> Function(
-            WidgetTester tester)? onTest,
+    {Future<void> Function(WidgetTester tester)? onTest,
     String? goldenDir,
     TestScreenConfig? config,
     TargetPlatform? onlyPlatform}) async {
@@ -89,7 +81,7 @@ void _internalTestScreen(
   group(description, () {
     for (final TargetPlatform platform in platforms) {
       final List<TestScreenDevice>? devices = platformDevices[platform];
-      if ((devices == null) || (devices.isEmpty)) {        
+      if ((devices == null) || (devices.isEmpty)) {
         // ignore: avoid_print
         print('No devices for $platform');
       } else {
@@ -99,20 +91,22 @@ void _internalTestScreen(
           for (final String localeName in config!.locales) {
             for (final TestScreenDevice device in devices) {
               group(localeName, () {
-                String name = '${device.id}: ${device.manufacturer} ${device.name}';
-                testWidgets(name, (WidgetTester tester) async {                  
+                String name =
+                    '${device.id}: ${device.manufacturer} ${device.name}';
+                testWidgets(name, (WidgetTester tester) async {
                   debugDefaultTargetPlatformOverride = platform;
                   TestWindow testWindow = tester.binding.window;
-                  testWindow.physicalSizeTestValue = device.size / device.devicePixelRatio;
-                  testWindow.devicePixelRatioTestValue = 1.0;                  
+                  testWindow.physicalSizeTestValue =
+                      device.size / device.devicePixelRatio;
+                  testWindow.devicePixelRatioTestValue = 1.0;
                   var locale = Locale(localeName);
                   testWindow.platformDispatcher.localesTestValue = [locale];
                   testWindow.platformDispatcher.localeTestValue = locale;
 
                   await config!.onBeforeCreate?.call(tester);
-                  final Widget screen = await createScreen();                  
-                  await tester.pumpWidget(
-                      config.wrapper?.call(screen) ?? screen);
+                  final Widget screen = await createScreen();
+                  await tester
+                      .pumpWidget(config.wrapper?.call(screen) ?? screen);
                   await config.onAfterCreate?.call(tester, screen);
                   await tester.pumpAndSettle();
                   await _loadImages(tester);
@@ -127,7 +121,8 @@ void _internalTestScreen(
                     rethrow;
                   }
                   if (testUI) {
-                    final String filenamePrefix = uiGolderDir == null ? '' : '${uiGolderDir}_';
+                    final String filenamePrefix =
+                        uiGolderDir == null ? '' : '${uiGolderDir}_';
                     final String goldenFileName =
                         '$rootGoldenDir$filenamePrefix${platformString}_${localeName}_${device.id}.png';
                     await expectLater(find.byWidget(screen),
@@ -136,14 +131,14 @@ void _internalTestScreen(
                   testWindow.platformDispatcher.clearLocaleTestValue();
                   testWindow.clearPhysicalSizeTestValue();
                   testWindow.clearDevicePixelRatioTestValue();
-                  debugDefaultTargetPlatformOverride = null;             
+                  debugDefaultTargetPlatformOverride = null;
                 }, tags: [testUI ? 'screen_ui' : 'screen']);
               });
             }
           }
         });
       }
-    }    
+    }
   });
   debugDisableShadows = oldDebugDisableShadows;
 }

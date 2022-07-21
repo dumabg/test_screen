@@ -1,3 +1,6 @@
+## 1.0.1
+* Resolve pub score warnings
+
 ## 1.0.0
 * Devices definitions loaded from Firebase Test Lab
 * Documentation

@@ -19,12 +19,16 @@ class TestScreenFont {
 class TestScreenDevice {
   /// Device id
   final String id;
+
   /// Manufacturer name
   final String manufacturer;
+
   /// Device model name
   final String name;
+
   /// Physical device size
   final Size size;
+
   /// Device pixel ratio
   final double devicePixelRatio;
 
@@ -38,9 +42,9 @@ class TestScreenDevice {
 
 /// Configuration for screen tests.
 /// [locales] a list of locales to test.
-/// 
+///
 /// [devices] a list of [TestScreenDevice] to test by platform.
-/// 
+///
 /// [wrapper] is a parent widget needed for the screen to run.
 /// For example, a [MaterialApp]:
 /// ```dart
@@ -52,12 +56,11 @@ class TestScreenDevice {
 ///        supportedLocales: AppLocalizations.supportedLocales,
 /// )));
 /// ```
-/// 
-/// The screen widget to test is created in this order: first [onBeforeCreate] is called. 
+///
+/// The screen widget to test is created in this order: first [onBeforeCreate] is called.
 /// Next is called the [createScreen] callback defined on the test. Next is
 /// called [wrapper] for wrapping the created screen and finally [onAfterCreate] is called.
 class TestScreenConfig {
-
   /// List of locales to test
   final List<String> locales;
 
@@ -72,8 +75,7 @@ class TestScreenConfig {
       onAfterCreate;
 
   /// Callback called before the screen widget creation.
-  final Future<void> Function(WidgetTester tester)?
-      onBeforeCreate;
+  final Future<void> Function(WidgetTester tester)? onBeforeCreate;
 
   TestScreenConfig(
       {required this.locales,
