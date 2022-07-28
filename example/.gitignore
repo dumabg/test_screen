@@ -49,4 +49,3 @@ app.*.map.json
 
 #test_screen
 test/**/failures
-test/**/screens
