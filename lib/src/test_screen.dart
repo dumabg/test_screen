@@ -10,20 +10,21 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
+import 'package:ui_target_platform/ui_target_platform.dart';
 import 'dart:ui' as ui;
 import 'test_screen_config.dart';
 import 'stack_trace_source.dart';
 
 /// It does exactly the same than [testScreenUI], but doesn't do the
-/// golden files bitmap comparation.
+/// golden files bitmap comparison.
 ///
 /// Every time the test is executed, the screen created by the test
 /// is compared with the png file of the golden dir. This consumes a lot of time.
-/// [testScreen] doesn't do this comparation.
+/// [testScreen] doesn't do this comparison.
 @isTestGroup
 void testScreen(Object description, Future<Widget> Function() createScreen,
     Future<void> Function(WidgetTester tester) onTest,
-    {TestScreenConfig? config, TargetPlatform? onlyPlatform}) {
+    {TestScreenConfig? config, UITargetPlatform? onlyPlatform}) {
   _internalTestScreen(description, createScreen, onTest,
       config: config, onlyPlatform: onlyPlatform, testUI: false);
 }
@@ -38,14 +39,14 @@ void testScreen(Object description, Future<Widget> Function() createScreen,
 /// [goldenDir] is the name of the subdirectory created inside the screens directory
 /// when the golden files are created.
 /// [config] use this config instead of the global configuration defined by [initializeDefaultTestScreenConfig].
-/// [onlyPlatform] execute the tests only for the platform specified, ignorig the specified
+/// [onlyPlatform] execute the tests only for the platform specified, ignoring the specified
 /// on [config] or [initializeDefaultTestScreenConfig].
 @isTestGroup
 void testScreenUI(Object description, Future<Widget> Function() createScreen,
     {Future<void> Function(WidgetTester tester)? onTest,
     String? goldenDir,
     TestScreenConfig? config,
-    TargetPlatform? onlyPlatform}) async {
+    UITargetPlatform? onlyPlatform}) async {
   _internalTestScreen(description, createScreen, onTest,
       config: config,
       onlyPlatform: onlyPlatform,
@@ -59,14 +60,14 @@ void _internalTestScreen(
     Future<Widget> Function() createScreen,
     Future<void> Function(WidgetTester tester)? onTest,
     {TestScreenConfig? config,
-    TargetPlatform? onlyPlatform,
+    UITargetPlatform? onlyPlatform,
     required bool testUI,
     String? uiGolderDir}) async {
   config = config ?? defaultTestScreenConfig;
   assert(config != null);
-  final Map<TargetPlatform, List<TestScreenDevice>> platformDevices =
+  final Map<UITargetPlatform, List<TestScreenDevice>> platformDevices =
       config!.devices;
-  final Iterable<TargetPlatform> platforms =
+  final Iterable<UITargetPlatform> platforms =
       onlyPlatform == null ? platformDevices.keys : [onlyPlatform];
   String pathSeparator = Platform.pathSeparator;
   String rootGoldenDir = 'screens$pathSeparator';
@@ -79,14 +80,14 @@ void _internalTestScreen(
   TestWidgetsFlutterBinding.ensureInitialized();
   bool oldDebugDisableShadows = debugDisableShadows;
   group(description, () {
-    for (final TargetPlatform platform in platforms) {
+    for (final UITargetPlatform platform in platforms) {
       final List<TestScreenDevice>? devices = platformDevices[platform];
       if ((devices == null) || (devices.isEmpty)) {
         // ignore: avoid_print
         print('No devices for $platform');
       } else {
         final String platformString =
-            platform.toString().substring('TargetPlatform.'.length);
+            platform.toString().substring('UITargetPlatform.'.length);
         group(platformString, () {
           for (final String localeName in config!.locales) {
             for (final TestScreenDevice device in devices) {
@@ -94,7 +95,7 @@ void _internalTestScreen(
                 String name =
                     '${device.id}: ${device.manufacturer} ${device.name}';
                 testWidgets(name, (WidgetTester tester) async {
-                  debugDefaultTargetPlatformOverride = platform;
+                  _initializeTargetPlatform(platform);
                   TestWindow testWindow = tester.binding.window;
                   testWindow.physicalSizeTestValue =
                       device.size / device.devicePixelRatio;
@@ -132,6 +133,7 @@ void _internalTestScreen(
                   testWindow.clearPhysicalSizeTestValue();
                   testWindow.clearDevicePixelRatioTestValue();
                   debugDefaultTargetPlatformOverride = null;
+                  debugDefaultUITargetPlatformIsWeb = false;
                 }, tags: [testUI ? 'screen_ui' : 'screen']);
               });
             }
@@ -141,6 +143,16 @@ void _internalTestScreen(
     }
   });
   debugDisableShadows = oldDebugDisableShadows;
+}
+
+void _initializeTargetPlatform(UITargetPlatform platform) {
+  if (platform == UITargetPlatform.web) {
+    debugDefaultTargetPlatformOverride = null;
+    debugDefaultUITargetPlatformIsWeb = true;
+  } else {
+    debugDefaultTargetPlatformOverride = TargetPlatform.values[platform.index];
+    debugDefaultUITargetPlatformIsWeb = false;
+  }
 }
 
 Future<void> _testFailure(
