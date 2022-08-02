@@ -5,6 +5,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ui_target_platform/ui_target_platform.dart';
 
 import 'font_loader.dart';
 
@@ -37,7 +38,28 @@ class TestScreenDevice {
       required this.manufacturer,
       required this.name,
       required this.size,
-      required this.devicePixelRatio});
+      this.devicePixelRatio = 1.0});
+
+  /// Returns a TestScreenDevice for a web screen.
+  /// The defaults values are:
+  /// id: 'web_${width}x${height}'
+  /// manufacturer: 'web'
+  /// name: '${width}x${height}'
+  /// devicePixelRatio: 1.0
+  factory TestScreenDevice.forWeb(double width, double height) =>
+      TestScreenDevice.forWebWithSize(Size(width, height));
+
+  /// Returns a TestScreenDevice for a web screen.
+  /// The defaults values are:
+  /// id: 'web_${size.width}x${size.height}'
+  /// manufacturer: 'web'
+  /// name: '${size.width}x${size.height}'
+  /// devicePixelRatio: 1.0
+  factory TestScreenDevice.forWebWithSize(Size size) {
+    final sizeDesc = '${size.width.toInt()}x${size.height.toInt()}';
+    return TestScreenDevice(
+        id: 'web_$sizeDesc', manufacturer: 'web', name: sizeDesc, size: size);
+  }
 }
 
 /// Configuration for screen tests.
@@ -65,7 +87,7 @@ class TestScreenConfig {
   final List<String> locales;
 
   /// List of [TestScreenDevice] to test by platform.
-  final Map<TargetPlatform, List<TestScreenDevice>> devices;
+  final Map<UITargetPlatform, List<TestScreenDevice>> devices;
 
   /// Wrapper widget for the screen created.
   final Widget Function(Widget screen)? wrapper;
@@ -93,7 +115,7 @@ TestScreenConfig? defaultTestScreenConfig;
 /// Initialize the default configuration for all the screen tests.
 /// [fonts] are a list of fonts to use in the screen test.
 /// [loadDefaultFonts] loads all the fonts that you have on your project,
-/// aditionally test_screen have a Roboto font for Android and a SFProDisplay-Regular
+/// additionally test_screen have a Roboto font for Android and a SFProDisplay-Regular
 /// and  SFProText-Regular for iOS.
 Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
     {List<TestScreenFont> fonts = const [],

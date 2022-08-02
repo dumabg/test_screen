@@ -12,11 +12,14 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
         'en'
       ],
       devices: {
-        TargetPlatform.android: await AndroidFirebaseTestLab().devices(),
-        TargetPlatform.iOS: await IosFirebaseTestLab().devices(),
+        UITargetPlatform.android: await AndroidFirebaseTestLab().devices(),
+        UITargetPlatform.iOS: await IosFirebaseTestLab().devices(),
+        UITargetPlatform.web: [
+          TestScreenDevice.forWeb(1024, 768),
+          TestScreenDevice.forWeb(1280, 1024)
+        ]
       },
-      wrapper: (Widget screen) =>
-          MaterialApp(
+      wrapper: (Widget screen) => MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'test_screen Demo',
             theme: ThemeData(

@@ -174,7 +174,14 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.0.1"
+    version: "2.0.0"
+  ui_target_platform:
+    dependency: "direct main"
+    description:
+      name: ui_target_platform
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
   vector_math:
     dependency: transitive
     description:
