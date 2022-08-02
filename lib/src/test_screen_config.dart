@@ -56,7 +56,7 @@ class TestScreenDevice {
   /// name: '${size.width}x${size.height}'
   /// devicePixelRatio: 1.0
   factory TestScreenDevice.forWebWithSize(Size size) {
-    final sizeDesc = '${size.width}x${size.height}';
+    final sizeDesc = '${size.width.toInt()}x${size.height.toInt()}';
     return TestScreenDevice(
         id: 'web_$sizeDesc', manufacturer: 'web', name: sizeDesc, size: size);
   }

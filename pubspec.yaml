@@ -1,6 +1,6 @@
 name: test_screen
-description: Library for screen UI testing for multiple locales, platforms and devices and different states of the same screen.
-version: 1.0.1
+description: Library for screen UI testing for multiple locales, platforms and devices, with different states of the same screen.
+version: 2.0.0
 repository: https://github.com/dumabg/test_screen 
 homepage: https://github.com/dumabg/test_screen
 #TODO: Remove this when publish to pub
@@ -16,9 +16,7 @@ dependencies:
   flutter_test:
     sdk: flutter
   meta: ^1.7.0
-  #TODO: Change this when push on pub.dev  
-  ui_target_platform:
-    git: https://github.com/dumabg/ui_target_platform
+  ui_target_platform: ^1.0.0
 
 dev_dependencies:
   flutter_lints: ^2.0.1

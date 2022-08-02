@@ -26,9 +26,7 @@ dependencies:
 
   flutter_localizations:
     sdk: flutter
-  #TODO: Change this when push on pub.dev  
-  ui_target_platform:
-    git: https://github.com/dumabg/ui_target_platform
+  ui_target_platform: ^1.0.0      
 
   cupertino_icons: ^1.0.2
   intl: ^0.17.0

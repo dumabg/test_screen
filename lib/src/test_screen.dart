@@ -78,7 +78,6 @@ void _internalTestScreen(
     }
   }
   TestWidgetsFlutterBinding.ensureInitialized();
-  bool oldDebugDisableShadows = debugDisableShadows;
   group(description, () {
     for (final UITargetPlatform platform in platforms) {
       final List<TestScreenDevice>? devices = platformDevices[platform];
@@ -142,7 +141,6 @@ void _internalTestScreen(
       }
     }
   });
-  debugDisableShadows = oldDebugDisableShadows;
 }
 
 void _initializeTargetPlatform(UITargetPlatform platform) {

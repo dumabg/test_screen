@@ -26,13 +26,20 @@ The Golden assertions take longer to execute than traditional widget tests, so i
       - [Add the failures and screens directories to .gitignore](#add-the-failures-and-screens-directories-to-gitignore)
       - [Add a "screen" and "screen_ui" tag to your project](#add-a-screen-and-screen_ui-tag-to-your-project)
       - [Configure VS Code](#configure-vs-code)
+      - [Add the package to pubspec](#add-the-package-to-pubspec)
   - [Creating screen tests](#creating-screen-tests)
     - [Global configuration](#global-configuration)
-      - [Adding Android / iOS devices from Firebase Test Lab](#adding-android--ios-devices-from-firebase-test-lab)
+      - [Adding Android / iOS devices from Firebase Test Lab](#adding-android-ios-devices-from-firebase-test-lab)
       - [Other TestScreenConfig parameters](#other-testscreenconfig-parameters)
       - [Platform vs ThemeData.platform](#platform-vs-themedataplatform)
         - [When use Platform and when ThemeData.platform?](#when-use-platform-and-when-themedataplatform)
+        - [ThemeData.platform (TargetPlatform) on web applications](#themedataplatform-targetplatform-on-web-applications)
     - [Create screen tests](#create-screen-tests)
+    - [Other utility classes](#other-utility-classes)
+      - [`WidgetTester` extension.](#widgettester-extension)
+      - [ChildrenWithSomeOrderMatcher](#childrenwithsomeordermatcher)
+      - [TestScreenDevice.forWeb](#testscreendeviceforweb)
+  - [Golden files shadows](#golden-files-shadows)
   - [3rd Party Software Included or Modified in Project](#3rd-party-software-included-or-modified-in-project)
 
 <!-- /code_chunk_output -->
@@ -91,8 +98,8 @@ tags:
   screen_ui:
 ```
 
-This will indicate that screen and screen_ui are an expected test tag. All tests that use `testScreen()` or `testScreenUI()` will automatically be given this tag.
-This allows you to easily target screen or screen_ui tests from the command-line.
+This will indicate that `screen` and `screen_ui` are an expected test tag. All tests that use `testScreen()` or `testScreenUI()` will automatically be given this tag.
+This allows you to easily target `screen` or `screen_ui` tests from the command-line.
 
 #### Configure VS Code
 
@@ -122,6 +129,13 @@ This give you a context menu where you can easily regenerate the screens for a p
 
 ![Screenshot of 'Golden' shortcut in VSCode](resources/vscode.png)
 
+#### Add the package to pubspec
+
+This package is used in development, so add the dependency on `dev_dependencies`:
+
+```bash
+flutter pub add test_screen --dev
+```
 ## Creating screen tests
 Creating screen tests are divided in two steps:
 - Create a global configuration of platforms, locales and devices for testing.
@@ -293,7 +307,7 @@ Widget build(BuildContext context) {
     ...
 }
 ```
-See an example on `lib/screens/multi_platform/multi_platform_screen.dart` on the example project. 
+See an example on `lib/screens/multi_platform/multi_platform_screen.dart` on the example project.
 
 
 ##### When use Platform and when ThemeData.platform?
@@ -301,6 +315,51 @@ See an example on `lib/screens/multi_platform/multi_platform_screen.dart` on the
 Use `Platform` when your code depends on some specific platform functionality. Keep in mind that this code is only testable in that platform.
 
 Use `ThemeData.platform` if the code runs on all platforms, but only adapts depends on the platform. For example on the previous UI example.
+
+##### ThemeData.platform (TargetPlatform) on web applications
+
+`ThemeData.platform` returns a `TargetPlatform` enum. This enum hasn't a value for web applications. If your UI is multiplatform and needs to adapt to web, you need to use the global constant [`kIsWeb`](https://api.flutter.dev/flutter/foundation/kIsWeb-constant.html). Using `kIsWeb` has the same results than using `Platform`, it can only execute the code on a web environment, so it can't do tests on your development environment (Windows, linux, ...).
+
+To avoid this problem, `test_screen` package uses the package `ui_target_platform` for enumerating platforms. `ui_target_platform` defines the enum `UITargetPlatform`, that is the same than `TargetPlatform` but with a new value: `web`.
+
+Why has it been created in a separate package? Because if you need to use it, you need to import it in your code, and your code only needs this enum, not all the `test_screen` code.
+
+For example:
+```dart
+  @override
+  Widget build(BuildContext context) {
+    final platform =
+        UITargetPlatform.fromTargetPlatform(Theme.of(context).platform);
+    return Scaffold(
+        body: Column(
+      children: [
+        const SizedBox(
+          height: 30,
+        ),
+        Text(platform.toString()),
+        SizedBox(width: 200, child: _slider(platform)),
+      ],
+    ));
+  }
+
+  StatefulWidget _slider(UITargetPlatform platform) {
+    switch (platform) {
+      case UITargetPlatform.iOS:
+        return _cupertinoSlider();
+      case UITargetPlatform.web:
+        return _webSlider();
+      default:
+        return _defaultSlider();
+    }
+  }
+```
+You can see how `UITargetPlatform` is obtained from `ThemeData.platform` and is used like `TargetPlatform`, but with a new value, `UITargetPlatform.web`.
+
+Install the package to use it:
+
+```bash
+flutter pub add ui_target_platform
+```
 
 
 ### Create screen tests
@@ -344,6 +403,116 @@ You could see than `testScreenUI` have different goldenDir arguments. The test `
 ![Screenshot of golden dir subdirectories](resources/create_test_golden_dir.png)
 
 Every time the test is executed, the screen created by the test is compared with the png file of the golden dir. This consumes a lot of time. You can avoid this comparation using `testScreen`. It does exactly the same than `testScreenUI`, but doesn't do the bitmap comparation.
+
+### Other utility classes
+#### `WidgetTester` extension.
+It has methods for obtaining locale, locales, devicePixelRatio and size.
+
+#### ChildrenWithSomeOrderMatcher
+Compare the Actual finder children with the [finders] sequencially.
+```dart
+ ListView(
+  children: [
+    const YourWidget(),
+    AnotherWidget(),
+    Container(
+      child: Text('Hello'),
+    ),
+    Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [Widget1(),
+                  Widget2()],
+      ),
+    ),
+  ],
+);
+```
+Match:
+```dart
+expect(
+  find.byType(ListView),
+  ChildrenWithSomeOrderMatcher([
+    find.byType(YourWidget),
+    find.text('Hello'),
+    find.byType(Widget2),
+]));
+```
+No match:
+```dart
+expect(
+  find.byType(ListView),
+  ChildrenWithSomeOrderMatcher([
+    find.text('Hello'),
+    find.byType(YourWidget),
+    find.byType(Widget2),
+]));
+```
+#### TestScreenDevice.forWeb
+Returns a `TestScreenDevice` for a web screen. It only defaults  `TestScreenDevice` constructor values, so it's more readable and easy for defining web screen sizes:
+
+```dart
+initializeDefaultTestScreenConfig(TestScreenConfig(
+      devices: {
+        UITargetPlatform.web: [
+          TestScreenDevice.forWeb(1280, 720),
+          TestScreenDevice.forWeb(800, 600)
+          ],
+      },
+```
+
+The defaults values are:
+```
+  id: 'web_${width}x${height}'
+  manufacturer: 'web'
+  name: '${width}x${height}'
+  devicePixelRatio: 1.0
+```
+
+## Golden files shadows
+Flutter test disables, by default, all the shadows, and replaces it with a solid color.
+
+For example, for this screen:
+
+![Screenshot of golden file with shadows](resources/golden_shadows.png)
+
+the golden file generated is:
+
+![Screenshot of golden file with shadow disabled](resources/golden_no_shadows.png)
+
+The reason is: 
+> the rendering of shadows is not guaranteed to be pixel-for-pixel identical from version to version (or even from run to run)."
+
+However, if you want to disable this behavior, you can change the value of the global variable `debugDisableShadows`.
+
+The help of this variable says: 
+> Whether to replace all shadows with solid color blocks.
+> 
+> This is useful when writing golden file tests (see [matchesGoldenFile]) since
+> the rendering of shadows is not guaranteed to be pixel-for-pixel identical from
+> version to version (or even from run to run).
+> 
+> In those tests, this is usually set to false at the beginning of a test and back
+> to true before the end of the test case.
+> 
+> If it remains true when the test ends, an exception is thrown to avoid state
+> leaking from one test case to another.
+
+So, remember to put this variable to `true` after the test ends, else it fails.
+
+For example:
+```dart
+group('Login Screen', () {
+    setUp(() => debugDisableShadows = false);
+    testScreenUI('Screen', () async => const LoginScreen(),
+        onTest: (tester) async {
+      // test code
+      // ...
+      debugDisableShadows = true;
+    });
+  });
+```
+
 
 ## 3rd Party Software Included or Modified in Project
   - font_loader.dart from Goolden Toolkit: https://pub.dev/packages/golden_toolkit
