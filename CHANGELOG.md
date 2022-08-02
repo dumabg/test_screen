@@ -1,3 +1,6 @@
+## 1.1.0
+* Add testing for web applications
+
 ## 1.0.1
 * Resolve pub score warnings
 
