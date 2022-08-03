@@ -29,7 +29,7 @@ The Golden assertions take longer to execute than traditional widget tests, so i
       - [Add the package to pubspec](#add-the-package-to-pubspec)
   - [Creating screen tests](#creating-screen-tests)
     - [Global configuration](#global-configuration)
-      - [Adding Android / iOS devices from Firebase Test Lab](#adding-android-ios-devices-from-firebase-test-lab)
+      - [Adding Android / iOS devices from Firebase Test Lab](#adding-android--ios-devices-from-firebase-test-lab)
       - [Other TestScreenConfig parameters](#other-testscreenconfig-parameters)
       - [Platform vs ThemeData.platform](#platform-vs-themedataplatform)
         - [When use Platform and when ThemeData.platform?](#when-use-platform-and-when-themedataplatform)
@@ -354,6 +354,15 @@ For example:
   }
 ```
 You can see how `UITargetPlatform` is obtained from `ThemeData.platform` and is used like `TargetPlatform`, but with a new value, `UITargetPlatform.web`.
+
+You can also use `UITargetPlatform.of`, 
+
+```dart
+  final platform = UITargetPlatform.of(context);
+```
+
+that is the same than `UITargetPlatform.fromTargetPlatform(Theme.of(context).platform)`.
+
 
 Install the package to use it:
 
