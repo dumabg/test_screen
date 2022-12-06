@@ -280,7 +280,7 @@ If your screen widget needs a parent for running, like `MaterialApp`, use the `w
 #### Platform vs ThemeData.platform
 If uses `Platform` for some specific platform code, the code is only testable in that platform.
 
-For example, if the test are running on linux and is doing tests for Android app, Platform.isAndroid returns false. 
+For example, if the test are running on Linux and is doing tests for Android app, Platform.isAndroid returns false. 
 
 ```dart
 @override
@@ -318,7 +318,7 @@ Use `ThemeData.platform` if the code runs on all platforms, but only adapts depe
 
 ##### ThemeData.platform (TargetPlatform) on web applications
 
-`ThemeData.platform` returns a `TargetPlatform` enum. This enum hasn't a value for web applications. If your UI is multiplatform and needs to adapt to web, you need to use the global constant [`kIsWeb`](https://api.flutter.dev/flutter/foundation/kIsWeb-constant.html). Using `kIsWeb` has the same results than using `Platform`, it can only execute the code on a web environment, so it can't do tests on your development environment (Windows, linux, ...).
+`ThemeData.platform` returns a `TargetPlatform` enum. This enum hasn't a value for web applications. If your UI is multi platform and needs to adapt to web, you need to use the global constant [`kIsWeb`](https://api.flutter.dev/flutter/foundation/kIsWeb-constant.html). Using `kIsWeb` has the same results than using `Platform`, it can only execute the code on a web environment, so it can't do tests on your development environment (Windows, Linux, ...).
 
 To avoid this problem, `test_screen` package uses the package `ui_target_platform` for enumerating platforms. `ui_target_platform` defines the enum `UITargetPlatform`, that is the same than `TargetPlatform` but with a new value: `web`.
 
@@ -385,7 +385,7 @@ void main() {
 
 Before run the test the first time, you must create the golden files (see [How it works?](#how-it-works)).
 
-Normally you want to test your screen in different states. Different states generates differents screens. To allow this, `testScreenUI` has the optional parameter `goldenDir`. This parameter creates a subdirectory inside the screens directory, allowing to separate the different screens for every state.
+Normally you want to test your screen in different states. Different states generates different screens. To allow this, `testScreenUI` has the optional parameter `goldenDir`. This parameter creates a subdirectory inside the screens directory, allowing to separate the different screens for every state.
 
 For example, in the example project, the Home screen is tested in 2 different states, when the screen appears and after the user pushes the button three times:
 
@@ -407,18 +407,18 @@ void main() {
   });
 }
 ```
-You could see than `testScreenUI` have different goldenDir arguments. The test `Init state` creates the golden files in the `init_state` subdirectory and the test `Pushed button 3 times` in the `pushed_3` subdiretory:
+You could see than `testScreenUI` have different goldenDir arguments. The test `Init state` creates the golden files in the `init_state` subdirectory and the test `Pushed button 3 times` in the `pushed_3` subdirectory:
 
 ![Screenshot of golden dir subdirectories](resources/create_test_golden_dir.png)
 
-Every time the test is executed, the screen created by the test is compared with the png file of the golden dir. This consumes a lot of time. You can avoid this comparation using `testScreen`. It does exactly the same than `testScreenUI`, but doesn't do the bitmap comparation.
+Every time the test is executed, the screen created by the test is compared with the png file of the golden dir. This consumes a lot of time. You can avoid this comparison using `testScreen`. It does exactly the same than `testScreenUI`, but doesn't do the bitmap comparison.
 
 ### Other utility classes
 #### `WidgetTester` extension.
 It has methods for obtaining locale, locales, devicePixelRatio and size.
 
 #### ChildrenWithSomeOrderMatcher
-Compare the Actual finder children with the [finders] sequencially.
+Compare the Actual finder children with the [finders] sequentially.
 ```dart
  ListView(
   children: [
@@ -524,6 +524,6 @@ group('Login Screen', () {
 
 
 ## 3rd Party Software Included or Modified in Project
-  - font_loader.dart from Goolden Toolkit: https://pub.dev/packages/golden_toolkit
+  - font_loader.dart from Golden Toolkit: https://pub.dev/packages/golden_toolkit
   - Roboto Font File: Available at URL: https://github.com/google/fonts/tree/master/apache/roboto License: Available under Apache license at https://github.com/google/fonts/blob/master/apache/roboto/LICENSE.txt
   - SFProDisplay and SFProText Font Files: Available at URL: https://fontsfree.net

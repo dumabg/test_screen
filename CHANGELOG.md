@@ -1,3 +1,6 @@
+## 1.1.1
+* Bug: DateFormat always formatted in english.
+
 ## 1.1.0
 * Add testing for web applications
 

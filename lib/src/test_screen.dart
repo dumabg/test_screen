@@ -3,12 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:ui_target_platform/ui_target_platform.dart';
 import 'dart:ui' as ui;
@@ -102,7 +101,8 @@ void _internalTestScreen(
                   var locale = Locale(localeName);
                   testWindow.platformDispatcher.localesTestValue = [locale];
                   testWindow.platformDispatcher.localeTestValue = locale;
-
+                  Intl.defaultLocale = localeName;
+                  Intl.systemLocale = localeName;
                   await config!.onBeforeCreate?.call(tester);
                   final Widget screen = await createScreen();
                   await tester
