@@ -14,7 +14,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
       devices: {
         UITargetPlatform.android: await AndroidFirebaseTestLab().devices(),
         UITargetPlatform.iOS: await IosFirebaseTestLab().devices(),
-        UITargetPlatform.web: [
+        UITargetPlatform.webLinux: [
           TestScreenDevice.forWeb(1024, 768),
           TestScreenDevice.forWeb(1280, 1024)
         ]

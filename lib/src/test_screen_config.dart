@@ -5,7 +5,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:ui_target_platform/ui_target_platform.dart';
+import 'package:test_screen/test_screen.dart';
 
 import 'font_loader.dart';
 
@@ -107,6 +107,22 @@ class TestScreenConfig {
       this.onAfterCreate})
       : assert(locales.isNotEmpty),
         assert(devices.isNotEmpty);
+
+  factory TestScreenConfig.defaultConfigCopy() {
+    Map<UITargetPlatform, List<TestScreenDevice>> clonedDevices = {};
+    Map<UITargetPlatform, List<TestScreenDevice>> devices =
+        defaultTestScreenConfig!.devices;
+    for (UITargetPlatform key in devices.keys) {
+      clonedDevices[key] = devices[key]!.where((element) => true).toList();
+    }
+    return TestScreenConfig(
+        onAfterCreate: defaultTestScreenConfig!.onAfterCreate,
+        onBeforeCreate: defaultTestScreenConfig!.onBeforeCreate,
+        wrapper: defaultTestScreenConfig!.wrapper,
+        locales:
+            defaultTestScreenConfig!.locales.where((element) => true).toList(),
+        devices: clonedDevices);
+  }
 }
 
 /// Default [TestScreenConfig] for all the screen tests.

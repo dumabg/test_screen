@@ -26,10 +26,11 @@ dependencies:
 
   flutter_localizations:
     sdk: flutter
-  ui_target_platform: ^1.1.0      
 
   cupertino_icons: ^1.0.2
   intl: ^0.17.0
+  isweb_test:   
+    path: /D/Projectes/lib/flutter/isWeb_test
 
 dev_dependencies:
   flutter_test:

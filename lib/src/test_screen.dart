@@ -9,10 +9,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
-import 'package:ui_target_platform/ui_target_platform.dart';
+import 'package:test_screen/test_screen.dart';
 import 'dart:ui' as ui;
 import 'test_screen_config.dart';
 import 'stack_trace_source.dart';
+import 'ui_target_platform.dart';
 
 /// It does exactly the same than [testScreenUI], but doesn't do the
 /// golden files bitmap comparison.
@@ -144,13 +145,12 @@ void _internalTestScreen(
 }
 
 void _initializeTargetPlatform(UITargetPlatform platform) {
-  if (platform == UITargetPlatform.web) {
-    debugDefaultTargetPlatformOverride = null;
-    debugDefaultUITargetPlatformIsWeb = true;
-  } else {
-    debugDefaultTargetPlatformOverride = TargetPlatform.values[platform.index];
-    debugDefaultUITargetPlatformIsWeb = false;
-  }
+  var platformIndex = platform.index;
+  var firstWebPlatformIndex = UITargetPlatform.webAndroid.index;
+  debugDefaultUITargetPlatformIsWeb = platformIndex >= firstWebPlatformIndex;
+  debugDefaultTargetPlatformOverride = debugDefaultUITargetPlatformIsWeb
+      ? TargetPlatform.values[platformIndex - firstWebPlatformIndex]
+      : TargetPlatform.values[platformIndex];
 }
 
 Future<void> _testFailure(

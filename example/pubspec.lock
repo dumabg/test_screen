@@ -168,13 +168,6 @@ packages:
       relative: true
     source: path
     version: "1.1.1"
-  ui_target_platform:
-    dependency: "direct main"
-    description:
-      name: ui_target_platform
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.1.0"
   vector_math:
     dependency: transitive
     description:
@@ -184,4 +177,3 @@ packages:
     version: "2.1.2"
 sdks:
   dart: ">=2.18.2 <3.0.0"
-  flutter: ">=1.17.0"

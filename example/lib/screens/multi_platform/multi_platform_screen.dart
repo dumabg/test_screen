@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:ui_target_platform/ui_target_platform.dart';
+import 'package:isweb_test/isweb_test.dart';
 
 class MultiPlatformScreen extends StatefulWidget {
   const MultiPlatformScreen({Key? key}) : super(key: key);
@@ -15,8 +15,6 @@ class _MultiPlatformScreenState extends State<MultiPlatformScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final platform =
-        UITargetPlatform.fromTargetPlatform(Theme.of(context).platform);
     return Scaffold(
         appBar: AppBar(
           title: Text(AppLocalizations.of(context)!.title_multiplatform),
@@ -26,20 +24,19 @@ class _MultiPlatformScreenState extends State<MultiPlatformScreen> {
             const SizedBox(
               height: 30,
             ),
-            Text(platform.toString()),
-            SizedBox(width: 200, child: _slider(platform)),
+            SizedBox(width: 200, child: _slider(context)),
           ],
         ));
   }
 
-  StatefulWidget _slider(UITargetPlatform platform) {
-    switch (platform) {
-      case UITargetPlatform.iOS:
-        return _cupertinoSlider();
-      case UITargetPlatform.web:
-        return _webSlider();
-      default:
-        return _defaultSlider();
+  Widget _slider(BuildContext context) {
+    if (isWeb()) {
+      return _webSlider();
+    } else {
+      final platform = Theme.of(context).platform;
+      return platform == TargetPlatform.iOS
+          ? _cupertinoSlider()
+          : _defaultSlider();
     }
   }
 

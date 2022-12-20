@@ -12,5 +12,4 @@ export 'src/test_screen_config.dart'
 export 'src/firebase_test_lab.dart'
     show AndroidFirebaseTestLab, IosFirebaseTestLab;
 export 'src/widget_tester_extension.dart' show WidgetTesterExtension;
-export 'package:ui_target_platform/ui_target_platform.dart'
-    show UITargetPlatform;
+export 'src/ui_target_platform.dart' show UITargetPlatform;
