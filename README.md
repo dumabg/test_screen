@@ -33,9 +33,10 @@ The Golden assertions take longer to execute than traditional widget tests, so i
       - [Other TestScreenConfig parameters](#other-testscreenconfig-parameters)
       - [Platform vs ThemeData.platform](#platform-vs-themedataplatform)
         - [When use Platform and when ThemeData.platform?](#when-use-platform-and-when-themedataplatform)
-        - [ThemeData.platform (TargetPlatform) on web applications](#themedataplatform-targetplatform-on-web-applications)
+        - [ThemeData.platform on web applications](#themedataplatform-on-web-applications)
     - [Create screen tests](#create-screen-tests)
-    - [Other utility classes](#other-utility-classes)
+    - [Other utility function / classes](#other-utility-function--classes)
+      - [wrapWidget function](#wrapwidget-function)
       - [`WidgetTester` extension.](#widgettester-extension)
       - [ChildrenWithSomeOrderMatcher](#childrenwithsomeordermatcher)
       - [TestScreenDevice.forWeb](#testscreendeviceforweb)
@@ -164,7 +165,7 @@ Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
         'en'
       ],
       devices: {
-        TargetPlatform.android: [
+        UITargetPlatform.android: [
             const TestScreenDevice(
               id: 'S2',
               manufacturer: 'Samsung',
@@ -178,7 +179,7 @@ Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
               size: Size(1080, 2280),
               devicePixelRatio: 2.0),
             ],
-        TargetPlatform.iOS: [
+        UITargetPlatform.iOS: [
           const TestScreenDevice(
               id: 'i8',
               manufacturer: 'Apple',
@@ -201,7 +202,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
         'en'
       ],
       devices: {
-        TargetPlatform.android: [
+        UITargetPlatform.android: [
             const TestScreenDevice(
               id: 'S2',
               manufacturer: 'Samsung',
@@ -215,7 +216,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
               size: Size(1080, 2280),
               devicePixelRatio: 2.0),
             ],
-        TargetPlatform.iOS: [
+        UITargetPlatform.iOS: [
           const TestScreenDevice(
               id: 'i8',
               manufacturer: 'Apple',
@@ -248,8 +249,8 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
         'en'
       ],
       devices: {
-        TargetPlatform.android: await AndroidFirebaseTestLab().devices(),
-        TargetPlatform.iOS: await IosFirebaseTestLab().devices(),
+        UITargetPlatform.android: await AndroidFirebaseTestLab().devices(),
+        UITargetPlatform.iOS: await IosFirebaseTestLab().devices(),
       },
       ...
 
@@ -316,20 +317,20 @@ Use `Platform` when your code depends on some specific platform functionality. K
 
 Use `ThemeData.platform` if the code runs on all platforms, but only adapts depends on the platform. For example on the previous UI example.
 
-##### ThemeData.platform (TargetPlatform) on web applications
+##### ThemeData.platform on web applications
 
 `ThemeData.platform` returns a `TargetPlatform` enum. This enum hasn't a value for web applications. If your UI is multi platform and needs to adapt to web, you need to use the global constant [`kIsWeb`](https://api.flutter.dev/flutter/foundation/kIsWeb-constant.html). Using `kIsWeb` has the same results than using `Platform`, it can only execute the code on a web environment, so it can't do tests on your development environment (Windows, Linux, ...).
 
-To avoid this problem, `test_screen` package uses the package `ui_target_platform` for enumerating platforms. `ui_target_platform` defines the enum `UITargetPlatform`, that is the same than `TargetPlatform` but with a new value: `web`.
+To avoid this problem, `test_screen` package uses the package `isweb_test`. It defines the global variable `debugIsWeb` and the function `isWeb`. The global variable `debugIsWeb` is used by `test_screen` for simulating the web environment. If you need to use `kIsWeb`, use `isWeb` function. It returns true if `kIsWeb` is true or `debugIsWeb` is true, so it allows to test web code.
 
-Why has it been created in a separate package? Because if you need to use it, you need to import it in your code, and your code only needs this enum, not all the `test_screen` code.
+Why has it been created in a separate package? Because if you need to use it, you need to import it in your code, and your code only needs this function, not all the `test_screen` code.
 
 For example:
 ```dart
   @override
   Widget build(BuildContext context) {
     final platform =
-        UITargetPlatform.fromTargetPlatform(Theme.of(context).platform);
+        TargetPlatform.fromTargetPlatform(Theme.of(context).platform);
     return Scaffold(
         body: Column(
       children: [
@@ -342,32 +343,24 @@ For example:
     ));
   }
 
-  StatefulWidget _slider(UITargetPlatform platform) {
+  StatefulWidget _slider(TargetPlatform platform) {
+    if isWeb() {
+      return _webSlider();
+    } else {
     switch (platform) {
-      case UITargetPlatform.iOS:
+      case TargetPlatform.iOS:
         return _cupertinoSlider();
-      case UITargetPlatform.web:
-        return _webSlider();
       default:
         return _defaultSlider();
+      }
     }
   }
 ```
-You can see how `UITargetPlatform` is obtained from `ThemeData.platform` and is used like `TargetPlatform`, but with a new value, `UITargetPlatform.web`.
-
-You can also use `UITargetPlatform.of`, 
-
-```dart
-  final platform = UITargetPlatform.of(context);
-```
-
-that is the same than `UITargetPlatform.fromTargetPlatform(Theme.of(context).platform)`.
-
 
 Install the package to use it:
 
 ```bash
-flutter pub add ui_target_platform
+flutter pub add isweb_test
 ```
 
 
@@ -413,7 +406,58 @@ You could see than `testScreenUI` have different goldenDir arguments. The test `
 
 Every time the test is executed, the screen created by the test is compared with the png file of the golden dir. This consumes a lot of time. You can avoid this comparison using `testScreen`. It does exactly the same than `testScreenUI`, but doesn't do the bitmap comparison.
 
-### Other utility classes
+### Other utility function / classes
+#### wrapWidget function
+Wraps a widget with the wrapper configured on initializeDefaultTestScreenConfig.
+
+Example:
+
+A wrapper defined in your initializeDefaultTestScreenConfig:
+
+```dart
+initializeDefaultTestScreenConfig(
+    TestScreenConfig(
+      ...
+      wrapper: (Widget screen) =>
+            MaterialApp(
+              debugShowCheckedModeBanner: false,
+              theme: ThemeData(
+                primarySwatch: Colors.blue,
+              ),
+              home: screen,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+            )));
+```
+
+When use wrapWidget in testWidget:
+
+```dart
+
+ testWidgets('Home', (WidgetTester tester) async {
+    await tester.pumpWidget(wrapWidget(const HomeScreen()));
+    final Finder addIcon = find.byIcon(Icons.add);
+    ...
+```
+
+Would be equivalent to:
+```dart
+
+ testWidgets('Home', (WidgetTester tester) async {
+    await tester.pumpWidget(
+          MaterialApp(
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              primarySwatch: Colors.blue,
+            ),
+            home: const HomeScreen(),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+          )));    
+    final Finder addIcon = find.byIcon(Icons.add);
+    ...
+```
+
 #### `WidgetTester` extension.
 It has methods for obtaining locale, locales, devicePixelRatio and size.
 
@@ -458,12 +502,12 @@ expect(
 ]));
 ```
 #### TestScreenDevice.forWeb
-Returns a `TestScreenDevice` for a web screen. It only defaults  `TestScreenDevice` constructor values, so it's more readable and easy for defining web screen sizes:
+Returns a `TestScreenDevice` for a web screen. It only defaults `TestScreenDevice` constructor values, so it's more readable and easy for defining web screen sizes:
 
 ```dart
 initializeDefaultTestScreenConfig(TestScreenConfig(
       devices: {
-        UITargetPlatform.web: [
+        UITargetPlatform.webWindows: [
           TestScreenDevice.forWeb(1280, 720),
           TestScreenDevice.forWeb(800, 600)
           ],

@@ -14,7 +14,7 @@ dependencies:
   flutter_test:
     sdk: flutter
   intl: ^0.17.0
-  meta: ^1.7.0
+  meta: ^1.8.0
   isweb_test:   
     path: /D/Projectes/lib/flutter/isWeb_test
 

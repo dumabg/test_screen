@@ -1,8 +1,8 @@
 ## 2.0.0
-* UITargetPlatform has incorporated to this package and isn't used anymore for detect web environments on the application code.
-* Using the new package isweb_test. It defines the global variable debugIsWeb and the function isWeb. The global variable debugIsWeb is used in this package for simulating the web environment. isWeb function must be used in the application code if need to create code only for the web environment.
+* UITargetPlatform has incorporated to this package and isn't used anymore for detect web environments on the application code. TargetPlatform on TestScreenConfig must be changed to UITargetPlatform.
+* Using the new package isweb_test. It defines the global variable debugIsWeb and the function isWeb. The global variable debugIsWeb is used in this package for simulating the web environment.
 * Adding web support for every platform. UITargetPlatform has the new enum values webAndroid, webFuchsia, webIos, webLinux, webMacOS and webWindows.
-
+* wrapWidget function. Wraps a widget with the wrapper configured on initializeDefaultTestScreenConfig.
 
 ## 1.1.1
 * Bug: DateFormat always formatted in english.

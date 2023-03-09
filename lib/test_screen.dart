@@ -13,3 +13,4 @@ export 'src/firebase_test_lab.dart'
     show AndroidFirebaseTestLab, IosFirebaseTestLab;
 export 'src/widget_tester_extension.dart' show WidgetTesterExtension;
 export 'src/ui_target_platform.dart' show UITargetPlatform;
+export 'src/wrap_widget.dart' show wrapWidget;
