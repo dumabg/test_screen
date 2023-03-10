@@ -91,10 +91,11 @@ packages:
   isweb_test:
     dependency: "direct main"
     description:
-      path: "/D/Projectes/lib/flutter/isWeb_test"
-      relative: false
-    source: path
-    version: "0.0.1"
+      name: isweb_test
+      sha256: b7f220b6009c2e47041eb6bc1ee2d598b0cb81124be1b0cbebf9ae2db943b8bd
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   js:
     dependency: transitive
     description:

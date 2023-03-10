@@ -3,7 +3,7 @@ description: Library for screen UI testing for multiple locales, platforms and d
 version: 2.0.0
 repository: https://github.com/dumabg/test_screen 
 homepage: https://github.com/dumabg/test_screen
-publish_to: none
+# publish_to: none
 
 environment:
   sdk: ">=2.18.2 <3.0.0"
@@ -14,9 +14,8 @@ dependencies:
   flutter_test:
     sdk: flutter
   intl: ^0.17.0
+  isweb_test: ^1.0.0
   meta: ^1.8.0
-  isweb_test:   
-    path: /D/Projectes/lib/flutter/isWeb_test
 
 dev_dependencies:
   flutter_lints: ^2.0.1
