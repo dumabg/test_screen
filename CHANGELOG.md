@@ -1,3 +1,6 @@
+## 2.0.1
+* Bug: If goldenDir on testScreenUI has subdirectories, the result golden file was created in an incorrect subdirectories structure.
+
 ## 2.0.0
 * UITargetPlatform has incorporated to this package and isn't used anymore for detect web environments on the application code. TargetPlatform on TestScreenConfig must be changed to UITargetPlatform.
 * Using the new package isweb_test. It defines the global variable debugIsWeb and the function isWeb. The global variable debugIsWeb is used in this package for simulating the web environment.
