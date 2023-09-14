@@ -11,7 +11,7 @@
 			"request": "launch",
 			"args": [
 				"--extensionDevelopmentPath=${workspaceFolder}",
-				"/D/Projectes/IndulgeMe/dev/app/app/src/"
+				"${workspaceFolder}/../../src/example"
 			],
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js"

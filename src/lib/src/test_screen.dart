@@ -93,6 +93,9 @@ void _internalTestScreen(
               group(localeName, () {
                 String name =
                     '${device.id}: ${device.manufacturer} ${device.name}';
+                if (uiGolderDir != null) {
+                  name = '$name ¬$uiGolderDir';
+                }
                 testWidgets(name, (WidgetTester tester) async {
                   _initializeTargetPlatform(platform);
                   final TestFlutterView view = tester.view;
@@ -123,11 +126,8 @@ void _internalTestScreen(
                     rethrow;
                   }
                   if (testUI) {
-                    final String filenamePrefix = uiGolderDir == null
-                        ? ''
-                        : _getFilenamePrefix(uiGolderDir);
                     final String goldenFileName =
-                        '$rootGoldenDir$filenamePrefix${platformString}_${localeName}_${device.id}.png';
+                        '$rootGoldenDir${platformString}_${localeName}_${device.id}.png';
                     await expectLater(find.byWidget(screen),
                         matchesGoldenFile(goldenFileName));
                   }
@@ -144,12 +144,6 @@ void _internalTestScreen(
       }
     }
   });
-}
-
-String _getFilenamePrefix(String uiGolderDir) {
-  final int i = uiGolderDir.lastIndexOf(Platform.pathSeparator);
-  final String result = i == -1 ? uiGolderDir : uiGolderDir.substring(i + 1);
-  return '${result}_';
 }
 
 void _initializeTargetPlatform(UITargetPlatform platform) {

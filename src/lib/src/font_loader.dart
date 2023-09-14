@@ -24,12 +24,14 @@ Future<void> loadAppFonts() async {
     (string) async => json.decode(string),
   );
 
-  if (fontManifest is List<Map<String, dynamic>>) {
-    for (final Map<String, dynamic> font in fontManifest) {
+  if (fontManifest is List) {
+    for (final Map<String, dynamic> font
+        in fontManifest.cast<Map<String, dynamic>>()) {
       final fontLoader = FontLoader(derivedFontFamily(font));
       final dynamic fonts = font['fonts'];
-      if (fonts is List<Map<String, dynamic>>) {
-        for (final Map<String, dynamic> fontType in fonts) {
+      if (fonts is List) {
+        for (final Map<String, dynamic> fontType
+            in fonts.cast<Map<String, dynamic>>()) {
           fontLoader.addFont(rootBundle.load(fontType['asset'] as String));
         }
         await fontLoader.load();
@@ -68,8 +70,9 @@ String derivedFontFamily(Map<String, dynamic> fontDefinition) {
     }
   } else {
     final dynamic fonts = fontDefinition['fonts'];
-    if (fonts is List<Map<String, dynamic>>) {
-      for (final Map<String, dynamic> fontType in fonts) {
+    if (fonts is List) {
+      for (final Map<String, dynamic> fontType
+          in fonts.cast<Map<String, dynamic>>()) {
         final String? asset = fontType['asset'] as String?;
         if (asset != null && asset.startsWith('packages')) {
           final packageName = asset.split('/')[1];

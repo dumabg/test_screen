@@ -104,6 +104,8 @@ This allows you to easily target `screen` or `screen_ui` tests from the command-
 
 #### Configure VS Code
 
+##### launch.json
+
 If you use VSCode, we highly recommend adding this configuration to your `.vscode/launch.json` file in the root of your workspace.
 
 ```json
@@ -129,6 +131,10 @@ If you use VSCode, we highly recommend adding this configuration to your `.vscod
 This give you a context menu where you can easily regenerate the screens for a particular test directly from the IDE:
 
 ![Screenshot of 'Golden' shortcut in VSCode](resources/vscode.png)
+
+##### testscreen extension
+
+
 
 #### Add the package to pubspec
 

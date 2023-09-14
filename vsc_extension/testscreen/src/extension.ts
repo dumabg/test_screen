@@ -28,7 +28,15 @@ export function activate(context: vscode.ExtensionContext) {
 							vscode.window.showErrorMessage('Screen file not found: Platform not found.');
 						} else {
 							const platform = testId.substring(spaceIndexPlatform + 1, spaceIndexLanguage);
-							const screenPath = `${path.dirname(test.uri.fsPath)}/screens/${platform}_${language}_${id}.png`;
+
+							// test.label format: "name ¬goldenDir". ¬goldenDir only appears if testScreenUI has goldenDir property.
+							// This means that inside the screens directory a subdirectory with name goldenDir is created.
+							const label = test.label;
+							const startSubdirectoryIndex = label.lastIndexOf('¬');
+							const subdirectory = startSubdirectoryIndex === -1 ? 
+								'': 
+								`/${label.substring(startSubdirectoryIndex + 1, label.length)}`;
+							const screenPath = `${path.dirname(test.uri.fsPath)}/screens${subdirectory}/${platform}_${language}_${id}.png`;
 							// Check if the screen file exists
 							if (fs.existsSync(screenPath)) {
 								// If the screen file exists, open it

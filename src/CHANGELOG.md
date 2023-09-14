@@ -1,3 +1,7 @@
+## 3.0.0
+* Upgrade to Flutter 3.
+* Upgrade documentation to describe testscreen extension for Visual Studio Code.
+
 ## 2.0.1
 * Bug: If goldenDir on testScreenUI has subdirectories, the result golden file was created in an incorrect subdirectories structure.
 
@@ -11,15 +15,15 @@
 * Bug: DateFormat always formatted in english.
 
 ## 1.1.0
-* Add testing for web applications
+* Add testing for web applications.
 
 ## 1.0.1
-* Resolve pub score warnings
+* Resolve pub score warnings.
 
 ## 1.0.0
-* Devices definitions loaded from Firebase Test Lab
-* Documentation
-* Example
+* Devices definitions loaded from Firebase Test Lab.
+* Documentation.
+* Example.
   
 ## 0.2.3
-* Beta version
+* Beta version.
