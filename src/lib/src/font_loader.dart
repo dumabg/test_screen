@@ -24,12 +24,17 @@ Future<void> loadAppFonts() async {
     (string) async => json.decode(string),
   );
 
-  for (final Map<String, dynamic> font in fontManifest) {
-    final fontLoader = FontLoader(derivedFontFamily(font));
-    for (final Map<String, dynamic> fontType in font['fonts']) {
-      fontLoader.addFont(rootBundle.load(fontType['asset'] as String));
+  if (fontManifest is List<Map<String, dynamic>>) {
+    for (final Map<String, dynamic> font in fontManifest) {
+      final fontLoader = FontLoader(derivedFontFamily(font));
+      final dynamic fonts = font['fonts'];
+      if (fonts is List<Map<String, dynamic>>) {
+        for (final Map<String, dynamic> fontType in fonts) {
+          fontLoader.addFont(rootBundle.load(fontType['asset'] as String));
+        }
+        await fontLoader.load();
+      }
     }
-    await fontLoader.load();
   }
 }
 
@@ -62,11 +67,14 @@ String derivedFontFamily(Map<String, dynamic> fontDefinition) {
       return fontFamilyName;
     }
   } else {
-    for (final Map<String, dynamic> fontType in fontDefinition['fonts']) {
-      final String? asset = fontType['asset'] as String?;
-      if (asset != null && asset.startsWith('packages')) {
-        final packageName = asset.split('/')[1];
-        return 'packages/$packageName/$fontFamily';
+    final dynamic fonts = fontDefinition['fonts'];
+    if (fonts is List<Map<String, dynamic>>) {
+      for (final Map<String, dynamic> fontType in fonts) {
+        final String? asset = fontType['asset'] as String?;
+        if (asset != null && asset.startsWith('packages')) {
+          final packageName = asset.split('/')[1];
+          return 'packages/$packageName/$fontFamily';
+        }
       }
     }
   }

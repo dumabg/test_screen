@@ -35,13 +35,13 @@ void main() {
       const YourWidget(),
       const AnotherWidget(),
       Container(
-        color: const Color.fromARGB(0, 0, 0, 0),
+        color: Colors.black,
         child: const Text('Hello'),
       ),
-      Padding(
-        padding: const EdgeInsets.all(8.0),
+      const Padding(
+        padding: EdgeInsets.all(8.0),
         child: Column(
-          children: const [Widget1(), Widget2()],
+          children: [Widget1(), Widget2()],
         ),
       ),
     ],

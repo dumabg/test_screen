@@ -5,7 +5,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Compare the Actual finder children with the [finders] sequencially.
+/// Compare the Actual finder children with the [finders] sequentially.
 ///
 /// ## Sample code
 ///
@@ -56,11 +56,11 @@ class ChildrenWithSomeOrderMatcher extends Matcher {
   @override
   Description describe(Description description) {
     return description.add(
-        'every finder must match with the children of Actual sequencially');
+        'every finder must match with the children of Actual sequentially');
   }
 
   @override
-  bool matches(covariant Finder item, Map matchState) {
+  bool matches(covariant Finder item, Map<dynamic, dynamic> matchState) {
     final Finder childrenFinder = find.descendant(
       of: item.first,
       matching: find.byType(KeyedSubtree),
@@ -90,8 +90,11 @@ class ChildrenWithSomeOrderMatcher extends Matcher {
   }
 
   @override
-  Description describeMismatch(covariant Finder item,
-      Description mismatchDescription, Map matchState, bool verbose) {
+  Description describeMismatch(
+      covariant Finder item,
+      Description mismatchDescription,
+      Map<dynamic, dynamic> matchState,
+      bool verbose) {
     String description =
         item.evaluate().elementAt(0).widget.runtimeType.toString();
     if (matchState.containsKey('error_length')) {

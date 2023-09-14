@@ -54,7 +54,7 @@ abstract class FirebaseTestLab {
 
   void _loadFromCache(File file) {
     List<String> lines = file.readAsLinesSync();
-    while (lines[lines.length - 1].isEmpty) {
+    while (lines.last.isEmpty) {
       lines.removeLast();
     }
     for (String line in lines) {
@@ -95,7 +95,7 @@ abstract class FirebaseTestLab {
   String getManufacturer(String modelDesc);
 
   Future<void> _loadFromFirebaseTestLab() async {
-    List<String> gcloudModels = (await _gCloudModelsList()).split("\n");
+    List<String> gcloudModels = (await _gCloudModelsList()).split('\n');
     // ignore: avoid_print
     print(gcloudModels);
     // ignore: avoid_print
@@ -152,9 +152,9 @@ abstract class FirebaseTestLab {
     ProcessResult result = await Process.run(
         'gcloud', ['firebase', 'test', _platform, 'models', 'list']);
     if (result.exitCode == 0) {
-      return result.stdout;
+      return result.stdout as Future<String>;
     } else {
-      throw GCloudException(result.stderr);
+      throw GCloudException(result.stderr.toString());
     }
   }
 
@@ -162,9 +162,9 @@ abstract class FirebaseTestLab {
     ProcessResult result = await Process.run('gcloud',
         ['firebase', 'test', _platform, 'models', 'describe', modelId]);
     if (result.exitCode == 0) {
-      return result.stdout;
+      return result.stdout as Future<String>;
     } else {
-      throw GCloudException(result.stderr);
+      throw GCloudException(result.stderr.toString());
     }
   }
 }
