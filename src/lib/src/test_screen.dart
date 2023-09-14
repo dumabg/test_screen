@@ -95,13 +95,14 @@ void _internalTestScreen(
                     '${device.id}: ${device.manufacturer} ${device.name}';
                 testWidgets(name, (WidgetTester tester) async {
                   _initializeTargetPlatform(platform);
-                  TestWindow testWindow = tester.binding.window;
-                  testWindow.physicalSizeTestValue =
-                      device.size / device.devicePixelRatio;
-                  testWindow.devicePixelRatioTestValue = 1.0;
-                  var locale = Locale(localeName);
-                  testWindow.platformDispatcher.localesTestValue = [locale];
-                  testWindow.platformDispatcher.localeTestValue = locale;
+                  final TestFlutterView view = tester.view;
+                  view.physicalSize = device.size / device.devicePixelRatio;
+                  view.devicePixelRatio = 1.0;
+                  final locale = Locale(localeName);
+                  final TestPlatformDispatcher platformDispatcher =
+                      tester.platformDispatcher;
+                  platformDispatcher.localesTestValue = [locale];
+                  platformDispatcher.localeTestValue = locale;
                   Intl.defaultLocale = localeName;
                   Intl.systemLocale = localeName;
                   await config!.onBeforeCreate?.call(tester);
@@ -130,9 +131,9 @@ void _internalTestScreen(
                     await expectLater(find.byWidget(screen),
                         matchesGoldenFile(goldenFileName));
                   }
-                  testWindow.platformDispatcher.clearLocaleTestValue();
-                  testWindow.clearPhysicalSizeTestValue();
-                  testWindow.clearDevicePixelRatioTestValue();
+                  platformDispatcher.clearLocaleTestValue();
+                  view.resetPhysicalSize();
+                  view.resetDevicePixelRatio();
                   debugDefaultTargetPlatformOverride = null;
                   debugDefaultUITargetPlatformIsWeb = false;
                 }, tags: [testUI ? 'screen_ui' : 'screen']);
@@ -184,7 +185,7 @@ Future<ui.Image> _captureImage(Element element) {
   assert(element.renderObject != null);
   RenderObject renderObject = element.renderObject!;
   while (!renderObject.isRepaintBoundary) {
-    renderObject = renderObject.parent! as RenderObject;
+    renderObject = renderObject.parent!;
   }
   assert(!renderObject.debugNeedsPaint);
   final OffsetLayer layer = renderObject.debugLayer! as OffsetLayer;

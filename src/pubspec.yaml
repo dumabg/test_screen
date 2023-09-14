@@ -1,12 +1,12 @@
 name: test_screen
 description: Library for screen UI testing for multiple locales, platforms and devices, with different states of the same screen.
-version: 2.0.1
+version: 3.0.0
 repository: https://github.com/dumabg/test_screen 
 homepage: https://github.com/dumabg/test_screen
 # publish_to: none
 
 environment:
-  sdk: ">=2.18.2 <3.0.0"
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   flutter:

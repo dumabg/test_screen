@@ -5,7 +5,7 @@ import 'package:test_screen_sample/screens/multi_platform/multi_platform_screen.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
-    @override
+  @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
@@ -20,12 +20,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(      
+    return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.title),
-        actions: [IconButton(
+        actions: [
+          IconButton(
             icon: const Icon(Icons.navigate_next),
-            onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => const MultiPlatformScreen())),)],
+            onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => const MultiPlatformScreen())),
+          )
+        ],
       ),
       body: Center(
         child: Column(
@@ -36,17 +40,23 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Text(
               '$_counter',
-              style: Theme.of(context).textTheme.headline4,
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
-            if (_counter == 3) 
-              const Icon(Icons.check, color: Colors.green, size: 42,)
+            if (_counter == 3)
+              const Icon(
+                Icons.check,
+                color: Colors.green,
+                size: 42,
+              )
           ],
         ),
-      ),      
-      floatingActionButton: _counter < 3 ? FloatingActionButton(
-        onPressed: _incrementCounter,
-        child: const Icon(Icons.add),
-      ) : null, 
+      ),
+      floatingActionButton: _counter < 3
+          ? FloatingActionButton(
+              onPressed: _incrementCounter,
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 }
