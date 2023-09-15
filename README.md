@@ -169,7 +169,7 @@ This give you a context menu where you can easily regenerate the screens for a p
 
 ##### Test Screen extension
 
-If you use VSC, we highly recommend adding the extension [Test Screen](../vsc_extension/testscreen/test-screen-1.0.0.vsix).
+If you use VSC, we highly recommend adding the extension [Test Screen](vsc_extension/test-screen-1.0.0.vsix).
 
 This extension allows to open the images created by test_screen inside VSC.
 
@@ -177,7 +177,7 @@ On testing appears a new icon for every test. When the icon is clicked, if the n
 
 ![Screenshot of Test Screen extension in VSCode](resources/testscreen_vsc.png)
 
-Download from [../vsc_extension/testscreen/test-screen-1.0.0.vsix](../vsc_extension/testscreen/test-screen-1.0.0.vsix).
+Download from [vsc_extension/test-screen-1.0.0.vsix](vsc_extension/test-screen-1.0.0.vsix).
 
 To install a VSIX extension in VSC, you can follow these steps:
 
