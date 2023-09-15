@@ -26,11 +26,14 @@ abstract class FirebaseTestLab {
   /// already exists in the devices list, it is ignored.
   final bool excludeSameLogicalSize;
 
+  /// If a device has width greater than height, it's ignored.
+  final bool excludeTablets;
+
   /// Doesn't include in the device list these models.
   final List<String> excludeModels;
 
   FirebaseTestLab(this._platform, String? cachePath,
-      this.excludeSameLogicalSize, this.excludeModels)
+      this.excludeSameLogicalSize, this.excludeModels, this.excludeTablets)
       : cachePath =
             cachePath ?? 'test/firebase_test_lab_${_platform}_devices.csv';
 
@@ -66,7 +69,9 @@ abstract class FirebaseTestLab {
       bool canAdd = (!excludeModels.contains(id)) &&
           (((excludeSameLogicalSize) &&
                   (!_existWithLogicalSize(size, devicePixelRatio))) ||
-              (!excludeSameLogicalSize));
+              (!excludeSameLogicalSize)) &&
+          ((!excludeTablets) ||
+              ((excludeTablets) && (size.height > size.width)));
       if (canAdd) {
         _devices.add(TestScreenDevice(
             id: id,
@@ -111,8 +116,6 @@ abstract class FirebaseTestLab {
       var modelDesc = await _gCloudModelsDescribe(modelId);
       // ignore: avoid_print
       print(modelDesc);
-      // ignore: avoid_print
-      print('-------------------------------------');
       try {
         final screenX = double.parse(getProperty(modelDesc, 'screenX'));
         final screenY = double.parse(getProperty(modelDesc, 'screenY'));
@@ -127,6 +130,9 @@ abstract class FirebaseTestLab {
       } catch (e) {
         // ignore: avoid_print
         print(e);
+      } finally {
+        // ignore: avoid_print
+        print('-------------------------------------');
       }
     }
   }
@@ -152,7 +158,7 @@ abstract class FirebaseTestLab {
     ProcessResult result = await Process.run(
         'gcloud', ['firebase', 'test', _platform, 'models', 'list']);
     if (result.exitCode == 0) {
-      return result.stdout as Future<String>;
+      return result.stdout as String;
     } else {
       throw GCloudException(result.stderr.toString());
     }
@@ -162,7 +168,7 @@ abstract class FirebaseTestLab {
     ProcessResult result = await Process.run('gcloud',
         ['firebase', 'test', _platform, 'models', 'describe', modelId]);
     if (result.exitCode == 0) {
-      return result.stdout as Future<String>;
+      return result.stdout as String;
     } else {
       throw GCloudException(result.stderr.toString());
     }
@@ -172,9 +178,11 @@ abstract class FirebaseTestLab {
 class _AndroidFirebaseTestLab extends FirebaseTestLab {
   _AndroidFirebaseTestLab(
       {String? cachePath,
-      bool excludeSameLogicalSize = true,
+      required bool excludeSameLogicalSize,
+      required bool excludeTablets,
       List<String> excludeModels = const []})
-      : super('android', cachePath, excludeSameLogicalSize, excludeModels);
+      : super('android', cachePath, excludeSameLogicalSize, excludeModels,
+            excludeTablets);
 
   @override
   double getDevicePixelRatio(double screenDensity) => screenDensity / 160.0;
@@ -187,9 +195,11 @@ class _AndroidFirebaseTestLab extends FirebaseTestLab {
 class _IosFirebaseTestLab extends FirebaseTestLab {
   _IosFirebaseTestLab(
       {String? cachePath,
-      bool excludeSameLogicalSize = true,
+      required bool excludeSameLogicalSize,
+      required bool excludeTablets,
       List<String> excludeModels = const []})
-      : super('ios', cachePath, excludeSameLogicalSize, excludeModels);
+      : super('ios', cachePath, excludeSameLogicalSize, excludeModels,
+            excludeTablets);
 
   @override
   double getDevicePixelRatio(double screenDensity) =>
@@ -210,10 +220,12 @@ class AndroidFirebaseTestLab {
   AndroidFirebaseTestLab(
       {String? cachePath,
       bool excludeSameLogicalSize = true,
+      bool excludeTablets = true,
       List<String> excludeModels = const []})
       : _instance = _AndroidFirebaseTestLab(
             cachePath: cachePath,
             excludeModels: excludeModels,
+            excludeTablets: excludeTablets,
             excludeSameLogicalSize: excludeSameLogicalSize);
 
   /// The list of Android devices defined in Firebase Test labs.
@@ -231,10 +243,12 @@ class IosFirebaseTestLab {
   IosFirebaseTestLab(
       {String? cachePath,
       bool excludeSameLogicalSize = true,
+      bool excludeTablets = true,
       List<String> excludeModels = const []})
       : _instance = _IosFirebaseTestLab(
             cachePath: cachePath,
             excludeModels: excludeModels,
+            excludeTablets: excludeTablets,
             excludeSameLogicalSize: excludeSameLogicalSize);
 
   /// The list of iOS devices defined in Firebase Test labs.

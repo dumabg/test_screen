@@ -1,7 +1,8 @@
 ## 3.0.0
 * Upgrade to Flutter 3.
 * New testscreen extension for Visual Studio Code.
-* Upgrade documentation to describe testscreen extension for Visual Studio Code.
+* Added excludeTablets constructor param in AndroidFirebaseTestLab and IosFirebaseTestLab. Allow to exclude devices with with greater than height. True by default.
+* Updated documentation.
 
 ## 2.0.1
 * Bug: If goldenDir on testScreenUI has subdirectories, the result golden file was created in an incorrect subdirectories structure.

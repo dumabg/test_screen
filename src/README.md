@@ -12,10 +12,16 @@ Goldens aren't intended to be a replacement of typical behavioral widget testing
 
 The Golden assertions take longer to execute than traditional widget tests, so it is recommended to be intentional about when they are used. Additionally, they can have many reasons to change. Often, the primary reason a golden test will fail is because of an intentional change. Thankfully, Flutter makes it easy to regenerate new reference images.
 
+## What's new
+- [Test Screen extension](#test-screen-extension)
+- `AndroidFirebaseTestLab` and `IosFirebaseTestLab` constructor parameters to control the devices returned. See in [Adding Android / iOS devices from Firebase Test Lab](#adding-android--ios-devices-from-firebase-test-lab)
+
+
 ## Table of Contents
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=7 orderedList=false} -->
 - [Test Screen](#test-screen)
+  - [What's new](#whats-new)
   - [Table of Contents](#table-of-contents)
   - [How it works?](#how-it-works)
   - [Getting Started](#getting-started)
@@ -45,6 +51,7 @@ The Golden assertions take longer to execute than traditional widget tests, so i
 <!-- code_chunk_output -->
 
 - [Test Screen](#test-screen)
+  - [What's new](#whats-new)
   - [Table of Contents](#table-of-contents)
   - [How it works?](#how-it-works)
   - [Getting Started](#getting-started)
@@ -316,6 +323,10 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
 
 In the example project, in the `test` directory, you can find the `firebase_test_lab_android_devices.csv` and `firebase_test_lab_ios_devices.csv` files generated when the tests for example project was executed. If prefer, you can use it.
 
+Both classes have some constructor parameters to control the devices that returns:
+  - excludeSameLogicalSize: If a device is find with the same logical size than another device that already exists in the devices list, it is ignored.
+  - excludeTablets: If a device has width greater than height, it's ignored.
+  - excludeModels: Doesn't include in the device list these models.  
 
 #### Other TestScreenConfig parameters
 For every test, `onBeforeCreate`, `wrapper` and `onAfterCreate` are called.
