@@ -1,5 +1,6 @@
 ## 3.0.0
 * Upgrade to Flutter 3.
+* New testscreen extension for Visual Studio Code.
 * Upgrade documentation to describe testscreen extension for Visual Studio Code.
 
 ## 2.0.1

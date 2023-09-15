@@ -11,6 +11,8 @@
         "precache",
         "pubspec",
         "Roboto",
-        "testscreen"
+        "testscreen",
+        "vsix",
+        "VSIX"
     ]
 }
