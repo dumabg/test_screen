@@ -135,10 +135,11 @@ TestScreenConfig? defaultTestScreenConfig;
 /// and  SFProText-Regular for iOS.
 Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
     {List<TestScreenFont> fonts = const [],
-    bool loadDefaultFonts = true}) async {
+    bool loadDefaultFonts = true,
+    String? libraryName}) async {
   defaultTestScreenConfig = config;
   if (loadDefaultFonts) {
-    await loadAppFonts();
+    await loadAppFonts(libraryName);
   }
   for (TestScreenFont font in fonts) {
     _loadTestFont(font.family, font.fileName);

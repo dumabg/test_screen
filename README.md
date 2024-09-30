@@ -13,9 +13,7 @@ Goldens aren't intended to be a replacement of typical behavioral widget testing
 The Golden assertions take longer to execute than traditional widget tests, so it is recommended to be intentional about when they are used. Additionally, they can have many reasons to change. Often, the primary reason a golden test will fail is because of an intentional change. Thankfully, Flutter makes it easy to regenerate new reference images.
 
 ## What's new
-- [Test Screen extension](#test-screen-extension)
-- `AndroidFirebaseTestLab` and `IosFirebaseTestLab` constructor parameters to control the devices returned. See in [Adding Android / iOS devices from Firebase Test Lab](#adding-android--ios-devices-from-firebase-test-lab)
-
+- [Fonts](#fonts) in project libraries.
 
 ## Table of Contents
 
@@ -35,49 +33,19 @@ The Golden assertions take longer to execute than traditional widget tests, so i
   - [Creating screen tests](#creating-screen-tests)
     - [Global configuration](#global-configuration)
       - [Adding Android / iOS devices from Firebase Test Lab](#adding-android--ios-devices-from-firebase-test-lab)
+      - [Adding web screens](#adding-web-screens)
+      - [Fonts](#fonts)
       - [Other TestScreenConfig parameters](#other-testscreenconfig-parameters)
+    - [Create screen tests](#create-screen-tests)
       - [Platform vs ThemeData.platform](#platform-vs-themedataplatform)
         - [When use Platform and when ThemeData.platform?](#when-use-platform-and-when-themedataplatform)
         - [ThemeData.platform on web applications](#themedataplatform-on-web-applications)
-    - [Create screen tests](#create-screen-tests)
+      - [Golden files shadows](#golden-files-shadows)
     - [Other utility function / classes](#other-utility-function--classes)
       - [wrapWidget function](#wrapwidget-function)
       - [`WidgetTester` extension.](#widgettester-extension)
       - [ChildrenWithSomeOrderMatcher](#childrenwithsomeordermatcher)
-      - [TestScreenDevice.forWeb](#testscreendeviceforweb)
-  - [Golden files shadows](#golden-files-shadows)
   - [3rd Party Software Included or Modified in Project](#3rd-party-software-included-or-modified-in-project)
-
-<!-- code_chunk_output -->
-
-- [Test Screen](#test-screen)
-  - [What's new](#whats-new)
-  - [Table of Contents](#table-of-contents)
-  - [How it works?](#how-it-works)
-  - [Getting Started](#getting-started)
-    - [Setup](#setup)
-      - [Add the failures and screens directories to .gitignore](#add-the-failures-and-screens-directories-to-gitignore)
-      - [Add a "screen" and "screen\_ui" tag to your project](#add-a-screen-and-screen_ui-tag-to-your-project)
-      - [Configure Visual Studio Code](#configure-visual-studio-code)
-        - [launch.json](#launchjson)
-        - [Test Screen extension](#test-screen-extension)
-      - [Add the package to pubspec](#add-the-package-to-pubspec)
-  - [Creating screen tests](#creating-screen-tests)
-    - [Global configuration](#global-configuration)
-      - [Adding Android / iOS devices from Firebase Test Lab](#adding-android--ios-devices-from-firebase-test-lab)
-      - [Other TestScreenConfig parameters](#other-testscreenconfig-parameters)
-      - [Platform vs ThemeData.platform](#platform-vs-themedataplatform)
-        - [When use Platform and when ThemeData.platform?](#when-use-platform-and-when-themedataplatform)
-        - [ThemeData.platform on web applications](#themedataplatform-on-web-applications)
-    - [Create screen tests](#create-screen-tests)
-    - [Other utility function / classes](#other-utility-function--classes)
-      - [wrapWidget function](#wrapwidget-function)
-      - [`WidgetTester` extension.](#widgettester-extension)
-      - [ChildrenWithSomeOrderMatcher](#childrenwithsomeordermatcher)
-      - [TestScreenDevice.forWeb](#testscreendeviceforweb)
-  - [Golden files shadows](#golden-files-shadows)
-  - [3rd Party Software Included or Modified in Project](#3rd-party-software-included-or-modified-in-project)
-
 <!-- /code_chunk_output -->
 ## How it works?
 
@@ -217,7 +185,8 @@ Use `initializeDefaultTestScreenConfig` for creating the configuration:
 ```dart
 Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
     {List<TestScreenFont> fonts = const [],
-    bool loadDefaultFonts = true})
+    bool loadDefaultFonts = true,
+    String? libraryName})
 ```
 
 `TestScreenConfig` class defines the locales and devices to test. 
@@ -328,6 +297,43 @@ Both classes have some constructor parameters to control the devices that return
   - excludeTablets: If a device has width greater than height, it's ignored.
   - excludeModels: Doesn't include in the device list these models.  
 
+#### Adding web screens 
+`TestScreenDevice.forWeb` returns a `TestScreenDevice` for a web screen. It only defaults `TestScreenDevice` constructor values, so it's more readable and easy for defining web screen sizes:
+
+```dart
+initializeDefaultTestScreenConfig(TestScreenConfig(
+      devices: {
+        UITargetPlatform.webWindows: [
+          TestScreenDevice.forWeb(1280, 720),
+          TestScreenDevice.forWeb(800, 600)
+          ],
+      },
+```
+
+The defaults values are:
+```
+  id: 'web_${width}x${height}'
+  manufacturer: 'web'
+  name: '${width}x${height}'
+  devicePixelRatio: 1.0
+```
+
+#### Fonts
+By default, all the fonts used in the project are loaded automatically.
+
+`initializeDefaultTestScreenConfig` allows to fine tuning the fonts loaded.
+
+```dart
+Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
+    {List<TestScreenFont> fonts = const [],
+    bool loadDefaultFonts = true,
+    String? libraryName})
+```
+- `fonts`: Load these fonts.
+- `loadDefaultFonts`: Controls if load all the fonts used in the project or not.
+- `libraryName`: If the project is a library, specify the library name. If not specified, fonts declared in pubspec can't load it.
+
+
 #### Other TestScreenConfig parameters
 For every test, `onBeforeCreate`, `wrapper` and `onAfterCreate` are called.
 The screen widget to test is created in this order: first `onBeforeCreate` is called. Next is called the `createScreen` callback defined on the test. Next is called `wrapper` for wrapping the created screen and finally `onAfterCreate` is called.
@@ -346,6 +352,48 @@ If your screen widget needs a parent for running, like `MaterialApp`, use the `w
             supportedLocales: AppLocalizations.supportedLocales,
           )));
 ```
+
+### Create screen tests
+
+_See the example project_
+
+Use `testScreenUI` for creating UI tests. You must pass a description and a callback to an async function that creates your screen.
+```dart
+void main() {
+  group('Home Screen', () {
+    testScreenUI('Init state', () async => const HomeScreen());
+    ...
+```
+
+Before run the test the first time, you must create the golden files (see [How it works?](#how-it-works)).
+
+Normally you want to test your screen in different states. Different states generates different screens. To allow this, `testScreenUI` has the optional parameter `goldenDir`. This parameter creates a subdirectory inside the screens directory, allowing to separate the different screens for every state.
+
+For example, in the example project, the Home screen is tested in 2 different states, when the screen appears and after the user pushes the button three times:
+
+```dart
+void main() {
+  group('Home Screen', () {
+
+    testScreenUI('Init state', () async => const HomeScreen(),
+      goldenDir: 'init_state');
+  
+    testScreenUI('Pushed button 3 times', () async => const HomeScreen(),
+      goldenDir: 'pushed_3',
+      onTest: (WidgetTester tester) async {
+        for (int i = 0; i < 3; i++) {
+          await tester.tap(find.byType(FloatingActionButton));
+          await tester.pump();
+        }
+      });
+  });
+}
+```
+You could see than `testScreenUI` have different goldenDir arguments. The test `Init state` creates the golden files in the `init_state` subdirectory and the test `Pushed button 3 times` in the `pushed_3` subdirectory:
+
+![Screenshot of golden dir subdirectories](resources/create_test_golden_dir.png)
+
+Every time the test is executed, the screen created by the test is compared with the png file of the golden dir. This consumes a lot of time. You can avoid this comparison using `testScreen`. It does exactly the same than `testScreenUI`, but doesn't do the bitmap comparison.
 
 #### Platform vs ThemeData.platform
 If uses `Platform` for some specific platform code, the code is only testable in that platform.
@@ -384,7 +432,7 @@ See an example on `lib/screens/multi_platform/multi_platform_screen.dart` on the
 
 Use `Platform` when your code depends on some specific platform functionality. Keep in mind that this code is only testable in that platform.
 
-Use `ThemeData.platform` if the code runs on all platforms, but only adapts depends on the platform. For example on the previous UI example.
+Use `ThemeData.platform` if the code runs on all platforms, but is adapting depending of the platform. For example on the previous UI example.
 
 ##### ThemeData.platform on web applications
 
@@ -432,49 +480,49 @@ Install the package to use it:
 flutter pub add isweb_test
 ```
 
+#### Golden files shadows
+Flutter test disables, by default, all the shadows, and replaces it with a solid color.
 
-### Create screen tests
+For example, for this screen:
 
-_See the example project_
+![Screenshot of golden file with shadows](resources/golden_shadows.png)
 
-Use `testScreenUI` for creating UI tests. You must pass a description and a callback to an async function that creates your screen.
+the golden file generated is:
+
+![Screenshot of golden file with shadow disabled](resources/golden_no_shadows.png)
+
+The reason is: 
+> the rendering of shadows is not guaranteed to be pixel-for-pixel identical from version to version (or even from run to run)."
+
+However, if you want to disable this behavior, you can change the value of the global variable `debugDisableShadows`.
+
+The help of this variable says: 
+> Whether to replace all shadows with solid color blocks.
+> 
+> This is useful when writing golden file tests (see [matchesGoldenFile]) since
+> the rendering of shadows is not guaranteed to be pixel-for-pixel identical from
+> version to version (or even from run to run).
+> 
+> In those tests, this is usually set to false at the beginning of a test and back
+> to true before the end of the test case.
+> 
+> If it remains true when the test ends, an exception is thrown to avoid state
+> leaking from one test case to another.
+
+So, remember to put this variable to `true` after the test ends, else it fails.
+
+For example:
 ```dart
-void main() {
-  group('Home Screen', () {
-    testScreenUI('Init state', () async => const HomeScreen());
-    ...
-```
-
-Before run the test the first time, you must create the golden files (see [How it works?](#how-it-works)).
-
-Normally you want to test your screen in different states. Different states generates different screens. To allow this, `testScreenUI` has the optional parameter `goldenDir`. This parameter creates a subdirectory inside the screens directory, allowing to separate the different screens for every state.
-
-For example, in the example project, the Home screen is tested in 2 different states, when the screen appears and after the user pushes the button three times:
-
-```dart
-void main() {
-  group('Home Screen', () {
-
-    testScreenUI('Init state', () async => const HomeScreen(),
-      goldenDir: 'init_state');
-  
-    testScreenUI('Pushed button 3 times', () async => const HomeScreen(),
-      goldenDir: 'pushed_3',
-      onTest: (WidgetTester tester) async {
-        for (int i = 0; i < 3; i++) {
-          await tester.tap(find.byType(FloatingActionButton));
-          await tester.pump();
-        }
-      });
+group('Login Screen', () {
+    setUp(() => debugDisableShadows = false);
+    testScreenUI('Screen', () async => const LoginScreen(),
+        onTest: (tester) async {
+      // test code
+      // ...
+      debugDisableShadows = true;
+    });
   });
-}
 ```
-You could see than `testScreenUI` have different goldenDir arguments. The test `Init state` creates the golden files in the `init_state` subdirectory and the test `Pushed button 3 times` in the `pushed_3` subdirectory:
-
-![Screenshot of golden dir subdirectories](resources/create_test_golden_dir.png)
-
-Every time the test is executed, the screen created by the test is compared with the png file of the golden dir. This consumes a lot of time. You can avoid this comparison using `testScreen`. It does exactly the same than `testScreenUI`, but doesn't do the bitmap comparison.
-
 ### Other utility function / classes
 #### wrapWidget function
 Wraps a widget with the wrapper configured on initializeDefaultTestScreenConfig.
@@ -570,72 +618,6 @@ expect(
     find.byType(Widget2),
 ]));
 ```
-#### TestScreenDevice.forWeb
-Returns a `TestScreenDevice` for a web screen. It only defaults `TestScreenDevice` constructor values, so it's more readable and easy for defining web screen sizes:
-
-```dart
-initializeDefaultTestScreenConfig(TestScreenConfig(
-      devices: {
-        UITargetPlatform.webWindows: [
-          TestScreenDevice.forWeb(1280, 720),
-          TestScreenDevice.forWeb(800, 600)
-          ],
-      },
-```
-
-The defaults values are:
-```
-  id: 'web_${width}x${height}'
-  manufacturer: 'web'
-  name: '${width}x${height}'
-  devicePixelRatio: 1.0
-```
-
-## Golden files shadows
-Flutter test disables, by default, all the shadows, and replaces it with a solid color.
-
-For example, for this screen:
-
-![Screenshot of golden file with shadows](resources/golden_shadows.png)
-
-the golden file generated is:
-
-![Screenshot of golden file with shadow disabled](resources/golden_no_shadows.png)
-
-The reason is: 
-> the rendering of shadows is not guaranteed to be pixel-for-pixel identical from version to version (or even from run to run)."
-
-However, if you want to disable this behavior, you can change the value of the global variable `debugDisableShadows`.
-
-The help of this variable says: 
-> Whether to replace all shadows with solid color blocks.
-> 
-> This is useful when writing golden file tests (see [matchesGoldenFile]) since
-> the rendering of shadows is not guaranteed to be pixel-for-pixel identical from
-> version to version (or even from run to run).
-> 
-> In those tests, this is usually set to false at the beginning of a test and back
-> to true before the end of the test case.
-> 
-> If it remains true when the test ends, an exception is thrown to avoid state
-> leaking from one test case to another.
-
-So, remember to put this variable to `true` after the test ends, else it fails.
-
-For example:
-```dart
-group('Login Screen', () {
-    setUp(() => debugDisableShadows = false);
-    testScreenUI('Screen', () async => const LoginScreen(),
-        onTest: (tester) async {
-      // test code
-      // ...
-      debugDisableShadows = true;
-    });
-  });
-```
-
-
 ## 3rd Party Software Included or Modified in Project
   - font_loader.dart from Golden Toolkit: https://pub.dev/packages/golden_toolkit
   - Roboto Font File: Available at URL: https://github.com/google/fonts/tree/master/apache/roboto License: Available under Apache license at https://github.com/google/fonts/blob/master/apache/roboto/LICENSE.txt

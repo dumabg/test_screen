@@ -1,11 +1,3 @@
-// ***************************************************
-// Copyright 2019-2020 eBay Inc.
-//
-// Use of this source code is governed by a BSD-style
-// license that can be found in the LICENSE file or at
-// https://opensource.org/licenses/BSD-3-Clause
-// ***************************************************
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 ///
 ///To make the goldens more useful, we will automatically load any fonts included in your pubspec.yaml as well as from
 ///packages you depend on.
-Future<void> loadAppFonts() async {
+Future<void> loadAppFonts(String? libraryName) async {
   TestWidgetsFlutterBinding.ensureInitialized();
   final dynamic fontManifest = await rootBundle.loadStructuredData<dynamic>(
     'FontManifest.json',
@@ -27,7 +19,12 @@ Future<void> loadAppFonts() async {
   if (fontManifest is List) {
     for (final Map<String, dynamic> font
         in fontManifest.cast<Map<String, dynamic>>()) {
-      final fontLoader = FontLoader(derivedFontFamily(font));
+      final String fontFamily = derivedFontFamily(font);
+      final fontLoader = FontLoader(fontFamily.startsWith('packages')
+          ? fontFamily
+          : libraryName == null
+              ? fontFamily
+              : 'packages/$libraryName/$fontFamily');
       final dynamic fonts = font['fonts'];
       if (fonts is List) {
         for (final Map<String, dynamic> fontType
