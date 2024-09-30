@@ -1,12 +1,15 @@
 {
-    "cSpell.words": [
+    "version": "0.2",
+    "ignorePaths": [],
+    "dictionaryDefinitions": [],
+    "dictionaries": [],
+    "words": [
         "Besalduch",
         "cupertino",
         "gcloud",
         "goldens",
         "Goldens",
         "isweb",
-        "linux",
         "overridable",
         "precache",
         "pubspec",
@@ -14,5 +17,7 @@
         "testscreen",
         "vsix",
         "VSIX"
-    ]
+    ],
+    "ignoreWords": [],
+    "import": []
 }
