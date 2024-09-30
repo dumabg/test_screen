@@ -110,14 +110,18 @@ void _internalTestScreen(
                   Intl.systemLocale = localeName;
                   await config!.onBeforeCreate?.call(tester);
                   final Widget screen = await createScreen();
-                  await tester
-                      .pumpWidget(config.wrapper?.call(screen) ?? screen);
-                  await config.onAfterCreate?.call(tester, screen);
-                  await tester.pumpAndSettle();
-                  await _loadImages(tester);
-                  await tester.pumpAndSettle();
+                  await tester.runAsync(() async {
+                    await tester
+                        .pumpWidget(config!.wrapper?.call(screen) ?? screen);
+                    await config.onAfterCreate?.call(tester, screen);
+                    await tester.pumpAndSettle();
+                    await _loadImages(tester);
+                    await tester.pumpAndSettle();
+                  });
                   try {
-                    await onTest?.call(tester);
+                    await tester.runAsync(() async {
+                      await onTest?.call(tester);
+                    });
                   } catch (e, stack) {
                     // ignore: avoid_print
                     print(
@@ -190,21 +194,19 @@ Future<void> _loadImages(WidgetTester tester) async {
   final imageElements = find.byType(Image, skipOffstage: false).evaluate();
   final containerElements =
       find.byType(DecoratedBox, skipOffstage: false).evaluate();
-  await tester.runAsync(() async {
-    for (final imageElement in imageElements) {
-      final widget = imageElement.widget;
-      if (widget is Image) {
-        await precacheImage(widget.image, imageElement);
+  for (final imageElement in imageElements) {
+    final widget = imageElement.widget;
+    if (widget is Image) {
+      await precacheImage(widget.image, imageElement);
+    }
+  }
+  for (final container in containerElements) {
+    final widget = container.widget as DecoratedBox;
+    final decoration = widget.decoration;
+    if (decoration is BoxDecoration) {
+      if (decoration.image != null) {
+        await precacheImage(decoration.image!.image, container);
       }
     }
-    for (final container in containerElements) {
-      final widget = container.widget as DecoratedBox;
-      final decoration = widget.decoration;
-      if (decoration is BoxDecoration) {
-        if (decoration.image != null) {
-          await precacheImage(decoration.image!.image, container);
-        }
-      }
-    }
-  });
+  }
 }
