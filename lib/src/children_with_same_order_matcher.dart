@@ -106,7 +106,7 @@ class ChildrenWithSomeOrderMatcher extends Matcher {
         return mismatchDescription
             .add('$description children not matches with any finder');
       } else {
-        String finderDesc = finders[last - 1].description;
+        String finderDesc = finders[last - 1].describeMatch(Plurality.zero);
         return mismatchDescription.add(
             '$description children matches until the $last finder: $finderDesc');
       }

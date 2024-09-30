@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:test_screen/test_screen.dart';
 
 class EmptyWidget extends StatelessWidget {
-  const EmptyWidget({Key? key}) : super(key: key);
+  const EmptyWidget({super.key});
   @override
   Widget build(BuildContext context) => const SizedBox(
         width: 20,
@@ -12,19 +12,19 @@ class EmptyWidget extends StatelessWidget {
 }
 
 class YourWidget extends EmptyWidget {
-  const YourWidget({Key? key}) : super(key: key);
+  const YourWidget({super.key});
 }
 
 class AnotherWidget extends EmptyWidget {
-  const AnotherWidget({Key? key}) : super(key: key);
+  const AnotherWidget({super.key});
 }
 
 class Widget1 extends EmptyWidget {
-  const Widget1({Key? key}) : super(key: key);
+  const Widget1({super.key});
 }
 
 class Widget2 extends EmptyWidget {
-  const Widget2({Key? key}) : super(key: key);
+  const Widget2({super.key});
 }
 
 void main() {

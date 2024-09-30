@@ -1,10 +1,10 @@
-/// ***************************************************
-/// Copyright 2019-2020 eBay Inc.
-///
-/// Use of this source code is governed by a BSD-style
-/// license that can be found in the LICENSE file or at
-/// https://opensource.org/licenses/BSD-3-Clause
-/// ***************************************************
+// ***************************************************
+// Copyright 2019-2020 eBay Inc.
+//
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file or at
+// https://opensource.org/licenses/BSD-3-Clause
+// ***************************************************
 
 import 'dart:convert';
 import 'package:flutter/material.dart';
