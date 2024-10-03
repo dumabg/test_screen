@@ -1,4 +1,5 @@
-// Copyright 2022 Miguel Angel Besalduch Garcia, mabg.dev@gmail.com. All rights reserved.
+// Copyright 2022 Miguel Angel Besalduch Garcia, mabg.dev@gmail.com.
+// All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -21,7 +22,7 @@ enum UITargetPlatform {
   iOS,
 
   /// Linux: <https://www.linux.org>
-  linux,
+  linux, //cSpell: disable-line
 
   /// macOS: <https://www.apple.com/macos>
   macOS,
@@ -32,12 +33,14 @@ enum UITargetPlatform {
   /// web application on android
   webAndroid,
 
+  //cSpell: disable-next-line
   /// web application on fucsia
   webFuchsia,
 
   /// web application on ios
   webIos,
 
+  // cSpell: disable-next-line
   /// web application on linux
   webLinux,
 

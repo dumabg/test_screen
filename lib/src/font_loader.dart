@@ -5,10 +5,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 ///By default, flutter test only uses a single "test" font called Ahem.
 ///
-///This font is designed to show black spaces for every character and icon. This obviously makes goldens much less valuable.
+///This font is designed to show black spaces for every character and icon.
+/// This obviously makes goldens much less valuable.
 ///
-///To make the goldens more useful, we will automatically load any fonts included in your pubspec.yaml as well as from
-///packages you depend on.
+///To make the goldens more useful, we will automatically load any fonts
+///included in your pubspec.yaml as well as from packages you depend on.
+///
+///If the project is a library, the fonts can't load correctly if the
+///[libraryName] parameter isn't specified.
 Future<void> loadAppFonts(String? libraryName) async {
   TestWidgetsFlutterBinding.ensureInitialized();
   final dynamic fontManifest = await rootBundle.loadStructuredData<dynamic>(
@@ -38,16 +42,18 @@ Future<void> loadAppFonts(String? libraryName) async {
 }
 
 /// There is no way to easily load the Roboto or Cupertino fonts.
-/// To make them available in tests, a package needs to include their own copies of them.
+/// To make them available in tests, a package needs to include their own copies
+/// of them.
 ///
 /// GoldenToolkit supplies Roboto because it is free to use.
 ///
-/// However, when a downstream package includes a font, the font family will be prefixed with
-/// /packages/<package name>/<fontFamily> in order to disambiguate when multiple packages include
-/// fonts with the same name.
+/// However, when a downstream package includes a font, the font family will be
+/// prefixed with /packages/<package name>/<fontFamily> in order to disambiguate
+/// when multiple packages include fonts with the same name.
 ///
-/// Ultimately, the font loader will load whatever we tell it, so if we see a font that looks like
-/// a Material or Cupertino font family, let's treat it as the main font family
+/// Ultimately, the font loader will load whatever we tell it, so if we see a
+/// font that looks like a Material or Cupertino font family, let's treat it as
+/// the main font family.
 @visibleForTesting
 String derivedFontFamily(Map<String, dynamic> fontDefinition) {
   if (!fontDefinition.containsKey('family')) {

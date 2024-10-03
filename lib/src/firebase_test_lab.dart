@@ -1,4 +1,5 @@
-// Copyright 2022 Miguel Angel Besalduch Garcia, mabg.dev@gmail.com. All rights reserved.
+// Copyright 2022 Miguel Angel Besalduch Garcia, mabg.dev@gmail.com.
+// All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -46,7 +47,7 @@ abstract class FirebaseTestLab {
   }
 
   Future<void> _load() async {
-    var file = File(cachePath);
+    final file = File(cachePath);
     if (await file.exists()) {
       _loadFromCache(file);
     } else {
@@ -56,22 +57,21 @@ abstract class FirebaseTestLab {
   }
 
   void _loadFromCache(File file) {
-    List<String> lines = file.readAsLinesSync();
+    final List<String> lines = file.readAsLinesSync();
     while (lines.last.isEmpty) {
       lines.removeLast();
     }
-    for (String line in lines) {
-      List<String> values = line.split('|');
+    for (final String line in lines) {
+      final List<String> values = line.split('|');
 
-      String id = values[0];
-      var size = Size(double.parse(values[3]), double.parse(values[4]));
-      var devicePixelRatio = double.parse(values[5]);
-      bool canAdd = (!excludeModels.contains(id)) &&
-          (((excludeSameLogicalSize) &&
+      final String id = values[0];
+      final size = Size(double.parse(values[3]), double.parse(values[4]));
+      final devicePixelRatio = double.parse(values[5]);
+      final bool canAdd = (!excludeModels.contains(id)) &&
+          ((excludeSameLogicalSize &&
                   (!_existWithLogicalSize(size, devicePixelRatio))) ||
               (!excludeSameLogicalSize)) &&
-          ((!excludeTablets) ||
-              ((excludeTablets) && (size.height > size.width)));
+          ((!excludeTablets) || (excludeTablets && (size.height > size.width)));
       if (canAdd) {
         _devices.add(TestScreenDevice(
             id: id,
@@ -84,8 +84,8 @@ abstract class FirebaseTestLab {
   }
 
   bool _existWithLogicalSize(Size size, double devicePixelRatio) {
-    Size logicalSize = size / devicePixelRatio;
-    for (TestScreenDevice device in _devices) {
+    final Size logicalSize = size / devicePixelRatio;
+    for (final TestScreenDevice device in _devices) {
       if (logicalSize == device.size / device.devicePixelRatio) {
         return true;
       }
@@ -100,7 +100,7 @@ abstract class FirebaseTestLab {
   String getManufacturer(String modelDesc);
 
   Future<void> _loadFromFirebaseTestLab() async {
-    List<String> gcloudModels = (await _gCloudModelsList()).split('\n');
+    final List<String> gcloudModels = (await _gCloudModelsList()).split('\n');
     // ignore: avoid_print
     print(gcloudModels);
     // ignore: avoid_print
@@ -111,9 +111,9 @@ abstract class FirebaseTestLab {
     }
     // 3 rows header
     for (int i = 3; i < indexEnd; i++) {
-      String line = gcloudModels[i];
-      String modelId = line.substring(2, line.indexOf(' ', 3));
-      var modelDesc = await _gCloudModelsDescribe(modelId);
+      final String line = gcloudModels[i];
+      final String modelId = line.substring(2, line.indexOf(' ', 3));
+      final modelDesc = await _gCloudModelsDescribe(modelId);
       // ignore: avoid_print
       print(modelDesc);
       try {
@@ -139,23 +139,24 @@ abstract class FirebaseTestLab {
 
   @protected
   String getProperty(String modelDesc, String property) {
-    int i = modelDesc.indexOf('$property: ') + property.length + 2;
-    int j = modelDesc.indexOf('\n', i);
+    final int i = modelDesc.indexOf('$property: ') + property.length + 2;
+    final int j = modelDesc.indexOf('\n', i);
     return modelDesc.substring(i, j);
   }
 
   void _saveToCacheFile() {
-    File file = File(cachePath);
-    file.openWrite();
-    for (TestScreenDevice device in _devices) {
+    final File file = File(cachePath)..openWrite();
+    for (final TestScreenDevice device in _devices) {
       file.writeAsStringSync(
-          '${device.id}|${device.manufacturer}|${device.name}|${device.size.width.toInt()}|${device.size.height.toInt()}|${device.devicePixelRatio}\n',
+          '${device.id}|${device.manufacturer}|${device.name}|'
+          '${device.size.width.toInt()}|${device.size.height.toInt()}|'
+          '${device.devicePixelRatio}\n',
           mode: FileMode.append);
     }
   }
 
   Future<String> _gCloudModelsList() async {
-    ProcessResult result = await Process.run(
+    final ProcessResult result = await Process.run(
         'gcloud', ['firebase', 'test', _platform, 'models', 'list']);
     if (result.exitCode == 0) {
       return result.stdout as String;
@@ -165,7 +166,7 @@ abstract class FirebaseTestLab {
   }
 
   Future<String> _gCloudModelsDescribe(String modelId) async {
-    ProcessResult result = await Process.run('gcloud',
+    final ProcessResult result = await Process.run('gcloud',
         ['firebase', 'test', _platform, 'models', 'describe', modelId]);
     if (result.exitCode == 0) {
       return result.stdout as String;
@@ -177,9 +178,9 @@ abstract class FirebaseTestLab {
 
 class _AndroidFirebaseTestLab extends FirebaseTestLab {
   _AndroidFirebaseTestLab(
-      {String? cachePath,
-      required bool excludeSameLogicalSize,
+      {required bool excludeSameLogicalSize,
       required bool excludeTablets,
+      String? cachePath,
       List<String> excludeModels = const []})
       : super('android', cachePath, excludeSameLogicalSize, excludeModels,
             excludeTablets);
@@ -194,9 +195,9 @@ class _AndroidFirebaseTestLab extends FirebaseTestLab {
 
 class _IosFirebaseTestLab extends FirebaseTestLab {
   _IosFirebaseTestLab(
-      {String? cachePath,
-      required bool excludeSameLogicalSize,
+      {required bool excludeSameLogicalSize,
       required bool excludeTablets,
+      String? cachePath,
       List<String> excludeModels = const []})
       : super('ios', cachePath, excludeSameLogicalSize, excludeModels,
             excludeTablets);
@@ -213,9 +214,9 @@ class _IosFirebaseTestLab extends FirebaseTestLab {
 class AndroidFirebaseTestLab {
   final _AndroidFirebaseTestLab _instance;
 
-  /// [cachePath] File path where the cache file with devices information is saved.
-  /// [excludeSameLogicalSize] If a device is find with the same logical size than another device that
-  /// already exists in the devices list, it is ignored.
+  /// [cachePath] File path where cache file with devices information is saved.
+  /// [excludeSameLogicalSize] If a device is found with the same logical size
+  /// than another device that already exists in the devices list, it's ignored.
   /// [excludeModels] Doesn't include in the device list these models.
   AndroidFirebaseTestLab(
       {String? cachePath,
@@ -236,9 +237,9 @@ class AndroidFirebaseTestLab {
 class IosFirebaseTestLab {
   final _IosFirebaseTestLab _instance;
 
-  /// [cachePath] File path where the cache file with devices information is saved.
-  /// [excludeSameLogicalSize] If a device is find with the same logical size than another device that
-  /// already exists in the devices list, it is ignored.
+  /// [cachePath] File path where cache file with devices information is saved.
+  /// [excludeSameLogicalSize] If a device is found with the same logical size
+  /// than another device that already exists in the devices list, it's ignored.
   /// [excludeModels] Doesn't include in the device list these models.
   IosFirebaseTestLab(
       {String? cachePath,

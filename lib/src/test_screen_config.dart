@@ -1,4 +1,5 @@
-// Copyright 2022 Miguel Angel Besalduch Garcia, mabg.dev@gmail.com. All rights reserved.
+// Copyright 2022 Miguel Angel Besalduch Garcia, mabg.dev@gmail.com.
+// All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -79,9 +80,11 @@ class TestScreenDevice {
 /// )));
 /// ```
 ///
-/// The screen widget to test is created in this order: first [onBeforeCreate] is called.
-/// Next is called the [createScreen] callback defined on the test. Next is
-/// called [wrapper] for wrapping the created screen and finally [onAfterCreate] is called.
+/// The screen widget to test is created in this order: first [onBeforeCreate]
+/// is called.
+/// Next is called the [createScreen] callback defined on the test.
+/// Next is called [wrapper] for wrapping the created screen and
+/// finally [onAfterCreate] is called.
 class TestScreenConfig {
   /// List of locales to test
   final List<String> locales;
@@ -109,10 +112,10 @@ class TestScreenConfig {
         assert(devices.isNotEmpty);
 
   factory TestScreenConfig.defaultConfigCopy() {
-    Map<UITargetPlatform, List<TestScreenDevice>> clonedDevices = {};
-    Map<UITargetPlatform, List<TestScreenDevice>> devices =
+    final Map<UITargetPlatform, List<TestScreenDevice>> clonedDevices = {};
+    final Map<UITargetPlatform, List<TestScreenDevice>> devices =
         defaultTestScreenConfig!.devices;
-    for (UITargetPlatform key in devices.keys) {
+    for (final UITargetPlatform key in devices.keys) {
       clonedDevices[key] = devices[key]!.where((element) => true).toList();
     }
     return TestScreenConfig(
@@ -131,8 +134,8 @@ TestScreenConfig? defaultTestScreenConfig;
 /// Initialize the default configuration for all the screen tests.
 /// [fonts] are a list of fonts to use in the screen test.
 /// [loadDefaultFonts] loads all the fonts that you have on your project,
-/// additionally test_screen have a Roboto font for Android and a SFProDisplay-Regular
-/// and  SFProText-Regular for iOS.
+/// additionally test_screen have Roboto font for Android and
+/// SFProDisplay-Regular and SFProText-Regular for iOS.
 Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
     {List<TestScreenFont> fonts = const [],
     bool loadDefaultFonts = true,
@@ -141,16 +144,12 @@ Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
   if (loadDefaultFonts) {
     await loadAppFonts(libraryName);
   }
-  for (TestScreenFont font in fonts) {
-    _loadTestFont(font.family, font.fileName);
+  for (final TestScreenFont font in fonts) {
+    await _loadTestFont(font.family, font.fileName);
   }
 }
 
 Future<void> _loadTestFont(String family, String fileName) async {
-  var fontLoader = FontLoader(family);
-  // var file = File(fileName);
-  // var data = (await file.readAsBytes()).buffer;
-  // fontLoader.addFont(Future.value(ByteData.view(data)));
-  fontLoader.addFont(rootBundle.load(fileName));
+  final fontLoader = FontLoader(family)..addFont(rootBundle.load(fileName));
   await fontLoader.load();
 }

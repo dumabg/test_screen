@@ -5,8 +5,8 @@ import 'package:test_screen/test_screen.dart';
 
 void main() {
   group('TestScreenConfig', () {
-    test('defaultConfigCopy', () {
-      var testScreenConfig = TestScreenConfig(
+    test('defaultConfigCopy', () async {
+      final testScreenConfig = TestScreenConfig(
           locales: [
             'pt',
             'en'
@@ -19,7 +19,7 @@ void main() {
                 showSemanticsDebugger: true,
                 home: Text('Hola'),
               ));
-      initializeDefaultTestScreenConfig(testScreenConfig);
+      await initializeDefaultTestScreenConfig(testScreenConfig);
       expect(testScreenConfig, equals(defaultTestScreenConfig));
       var testScreenConfigCopied = TestScreenConfig.defaultConfigCopy();
       expect(defaultTestScreenConfig, isNot(testScreenConfigCopied));

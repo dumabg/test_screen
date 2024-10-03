@@ -1,3 +1,7 @@
+## 3.1.0
+* Support for fonts when the project is a library.
+* Bug: Async error when the widget has a Future.delayed.
+
 ## 3.0.0
 * Upgrade to Flutter 3.
 * New testscreen extension for Visual Studio Code.

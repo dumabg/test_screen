@@ -6,14 +6,16 @@ import 'package:test_screen/src/test_screen_config.dart';
 void main() {
   group('Android devices from Firebase Test Lab', () {
     test('Default devices', () async {
-      AndroidFirebaseTestLab androidFirebaseTestLab = AndroidFirebaseTestLab();
-      List<TestScreenDevice> devices = await androidFirebaseTestLab.devices();
-      List<Size> sizes = devices
+      final AndroidFirebaseTestLab androidFirebaseTestLab =
+          AndroidFirebaseTestLab();
+      final List<TestScreenDevice> devices =
+          await androidFirebaseTestLab.devices();
+      final List<Size> sizes = devices
           .map<Size>((TestScreenDevice device) =>
               device.size / device.devicePixelRatio)
           .toList();
-      for (Size size in sizes) {
-        int num = sizes.fold<int>(
+      for (final Size size in sizes) {
+        final int num = sizes.fold<int>(
             0,
             (int previousValue, Size element) =>
                 size == element ? previousValue + 1 : previousValue);
@@ -22,16 +24,17 @@ void main() {
     });
 
     test('Include same logical size', () async {
-      AndroidFirebaseTestLab androidFirebaseTestLab =
+      final AndroidFirebaseTestLab androidFirebaseTestLab =
           AndroidFirebaseTestLab(excludeSameLogicalSize: false);
-      List<TestScreenDevice> devices = await androidFirebaseTestLab.devices();
-      List<Size> sizes = devices
+      final List<TestScreenDevice> devices =
+          await androidFirebaseTestLab.devices();
+      final List<Size> sizes = devices
           .map<Size>((TestScreenDevice device) =>
               device.size / device.devicePixelRatio)
           .toList();
       bool numGreaterThanOne = false;
-      for (Size size in sizes) {
-        int num = sizes.fold<int>(
+      for (final Size size in sizes) {
+        final int num = sizes.fold<int>(
             0,
             (int previousValue, Size element) =>
                 size == element ? previousValue + 1 : previousValue);
@@ -44,13 +47,15 @@ void main() {
     });
 
     test('Exclude models', () async {
-      AndroidFirebaseTestLab androidFirebaseTestLab = AndroidFirebaseTestLab(
-          excludeSameLogicalSize: false,
-          excludeTablets: false,
-          excludeModels: ['\'1610\'', 'x1q']);
-      List<TestScreenDevice> devices = await androidFirebaseTestLab.devices();
+      final AndroidFirebaseTestLab androidFirebaseTestLab =
+          AndroidFirebaseTestLab(
+              excludeSameLogicalSize: false,
+              excludeTablets: false,
+              excludeModels: ["'1610'", 'x1q']);
+      final List<TestScreenDevice> devices =
+          await androidFirebaseTestLab.devices();
       int index = devices
-          .indexWhere((TestScreenDevice device) => device.id == '\'1610\'');
+          .indexWhere((TestScreenDevice device) => device.id == "'1610'");
       expect(index, -1);
       index =
           devices.indexWhere((TestScreenDevice device) => device.id == 'x1q');
@@ -58,12 +63,14 @@ void main() {
     });
 
     test('Exclude tablets', () async {
-      AndroidFirebaseTestLab androidFirebaseTestLab = AndroidFirebaseTestLab(
+      final AndroidFirebaseTestLab androidFirebaseTestLab =
+          AndroidFirebaseTestLab(
         excludeSameLogicalSize: false,
       );
-      List<TestScreenDevice> devices = await androidFirebaseTestLab.devices();
+      final List<TestScreenDevice> devices =
+          await androidFirebaseTestLab.devices();
       expect(devices.length, greaterThan(0));
-      for (TestScreenDevice device in devices) {
+      for (final TestScreenDevice device in devices) {
         final Size size = device.size;
         expect(size.height, greaterThan(size.width), reason: device.name);
       }

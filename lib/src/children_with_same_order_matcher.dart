@@ -1,4 +1,5 @@
-// Copyright 2022 Miguel Angel Besalduch Garcia, mabg.dev@gmail.com. All rights reserved.
+// Copyright 2022 Miguel Angel Besalduch Garcia, mabg.dev@gmail.com.
+// All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -73,8 +74,8 @@ class ChildrenWithSomeOrderMatcher extends Matcher {
 
     int i = 0;
     Finder finder = finders[i];
-    for (Element subtree in subtrees) {
-      Iterable<Element> eFinder = find
+    for (final Element subtree in subtrees) {
+      final Iterable<Element> eFinder = find
           .descendant(of: find.byWidget(subtree.widget), matching: finder)
           .evaluate();
       if (eFinder.isNotEmpty) {
@@ -95,20 +96,22 @@ class ChildrenWithSomeOrderMatcher extends Matcher {
       Description mismatchDescription,
       Map<dynamic, dynamic> matchState,
       bool verbose) {
-    String description =
+    final String description =
         item.evaluate().elementAt(0).widget.runtimeType.toString();
     if (matchState.containsKey('error_length')) {
       return mismatchDescription
           .add('$description has less children than finders to match');
     } else {
-      int last = matchState['last'] as int;
+      final int last = matchState['last'] as int;
       if (last == 0) {
         return mismatchDescription
             .add('$description children not matches with any finder');
       } else {
-        String finderDesc = finders[last - 1].describeMatch(Plurality.zero);
-        return mismatchDescription.add(
-            '$description children matches until the $last finder: $finderDesc');
+        final String finderDesc =
+            finders[last - 1].describeMatch(Plurality.zero);
+        return mismatchDescription
+            .add('$description children matches until the $last finder: '
+                '$finderDesc');
       }
     }
   }

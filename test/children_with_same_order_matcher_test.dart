@@ -28,18 +28,18 @@ class Widget2 extends EmptyWidget {
 }
 
 void main() {
-  var widget = MaterialApp(
+  final widget = MaterialApp(
       home: Scaffold(
           body: ListView(
     children: [
       const YourWidget(),
       const AnotherWidget(),
-      Container(
+      ColoredBox(
         color: Colors.black,
         child: const Text('Hello'),
       ),
       const Padding(
-        padding: EdgeInsets.all(8.0),
+        padding: EdgeInsets.all(8),
         child: Column(
           children: [Widget1(), Widget2()],
         ),

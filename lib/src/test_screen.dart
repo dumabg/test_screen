@@ -1,8 +1,11 @@
-// Copyright 2022 Miguel Angel Besalduch Garcia, mabg.dev@gmail.com. All rights reserved.
+// Copyright 2022 Miguel Angel Besalduch Garcia, mabg.dev@gmail.com.
+// All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:io';
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -10,16 +13,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:test_screen/test_screen.dart';
-import 'dart:ui' as ui;
-import 'test_screen_config.dart';
+
 import 'stack_trace_source.dart';
+import 'test_screen_config.dart';
 import 'ui_target_platform.dart';
 
 /// It does exactly the same than [testScreenUI], but doesn't do the
 /// golden files bitmap comparison.
 ///
-/// Every time the test is executed, the screen created by the test
-/// is compared with the png file of the golden dir. This consumes a lot of time.
+/// Every time the test is executed, the screen created by the test is compared
+/// with the png file of the golden dir. This consumes a lot of time.
 /// [testScreen] doesn't do this comparison.
 @isTestGroup
 void testScreen(Object description, Future<Widget> Function() createScreen,
@@ -36,11 +39,12 @@ void testScreen(Object description, Future<Widget> Function() createScreen,
 /// [createScreen] is a callback function that creates the screen to test.
 /// [onTest] is a callback function called after the screen creation.
 /// Use it to change the state of your screen.
-/// [goldenDir] is the name of the subdirectory created inside the screens directory
-/// when the golden files are created.
-/// [config] use this config instead of the global configuration defined by [initializeDefaultTestScreenConfig].
-/// [onlyPlatform] execute the tests only for the platform specified, ignoring the specified
-/// on [config] or [initializeDefaultTestScreenConfig].
+/// [goldenDir] is the name of the subdirectory created inside the screens
+/// directory when the golden files are created.
+/// [config] use this config instead of the global configuration defined by
+/// [initializeDefaultTestScreenConfig].
+/// [onlyPlatform] execute the tests only for the platform specified, ignoring
+/// the specified on [config] or [initializeDefaultTestScreenConfig].
 @isTestGroup
 void testScreenUI(Object description, Future<Widget> Function() createScreen,
     {Future<void> Function(WidgetTester tester)? onTest,
@@ -59,9 +63,9 @@ void _internalTestScreen(
     Object description,
     Future<Widget> Function() createScreen,
     Future<void> Function(WidgetTester tester)? onTest,
-    {TestScreenConfig? config,
+    {required bool testUI,
+    TestScreenConfig? config,
     UITargetPlatform? onlyPlatform,
-    required bool testUI,
     String? uiGolderDir}) async {
   config = config ?? defaultTestScreenConfig;
   assert(config != null);
@@ -69,7 +73,7 @@ void _internalTestScreen(
       config!.devices;
   final Iterable<UITargetPlatform> platforms =
       onlyPlatform == null ? platformDevices.keys : [onlyPlatform];
-  String pathSeparator = Platform.pathSeparator;
+  final String pathSeparator = Platform.pathSeparator;
   String rootGoldenDir = 'screens$pathSeparator';
   if (uiGolderDir != null) {
     rootGoldenDir += uiGolderDir;
@@ -98,14 +102,14 @@ void _internalTestScreen(
                 }
                 testWidgets(name, (WidgetTester tester) async {
                   _initializeTargetPlatform(platform);
-                  final TestFlutterView view = tester.view;
-                  view.physicalSize = device.size / device.devicePixelRatio;
-                  view.devicePixelRatio = 1.0;
+                  final TestFlutterView view = tester.view
+                    ..physicalSize = device.size / device.devicePixelRatio
+                    ..devicePixelRatio = 1.0;
                   final locale = Locale(localeName);
                   final TestPlatformDispatcher platformDispatcher =
-                      tester.platformDispatcher;
-                  platformDispatcher.localesTestValue = [locale];
-                  platformDispatcher.localeTestValue = locale;
+                      tester.platformDispatcher
+                        ..localesTestValue = [locale]
+                        ..localeTestValue = locale;
                   Intl.defaultLocale = localeName;
                   Intl.systemLocale = localeName;
                   await config!.onBeforeCreate?.call(tester);
@@ -124,20 +128,22 @@ void _internalTestScreen(
                     });
                   } catch (e, stack) {
                     // ignore: avoid_print
-                    print(
-                        'Platform: $platformString. Locale: $localeName. Device: ${device.name}.');
+                    print('Platform: $platformString. Locale: $localeName. '
+                        'Device: ${device.name}.');
                     await _testFailure(tester, screen, stack);
                     rethrow;
                   }
                   if (testUI) {
                     final String goldenFileName =
-                        '$rootGoldenDir${platformString}_${localeName}_${device.id}.png';
+                        '$rootGoldenDir${platformString}_${localeName}_'
+                        '${device.id}.png';
                     await expectLater(find.byWidget(screen),
                         matchesGoldenFile(goldenFileName));
                   }
                   platformDispatcher.clearLocaleTestValue();
-                  view.resetPhysicalSize();
-                  view.resetDevicePixelRatio();
+                  view
+                    ..resetPhysicalSize()
+                    ..resetDevicePixelRatio();
                   debugDefaultTargetPlatformOverride = null;
                   debugDefaultUITargetPlatformIsWeb = false;
                 }, tags: [testUI ? 'screen_ui' : 'screen']);
@@ -151,8 +157,8 @@ void _internalTestScreen(
 }
 
 void _initializeTargetPlatform(UITargetPlatform platform) {
-  var platformIndex = platform.index;
-  var firstWebPlatformIndex = UITargetPlatform.webAndroid.index;
+  final platformIndex = platform.index;
+  final firstWebPlatformIndex = UITargetPlatform.webAndroid.index;
   debugDefaultUITargetPlatformIsWeb = platformIndex >= firstWebPlatformIndex;
   debugDefaultTargetPlatformOverride = debugDefaultUITargetPlatformIsWeb
       ? TargetPlatform.values[platformIndex - firstWebPlatformIndex]
