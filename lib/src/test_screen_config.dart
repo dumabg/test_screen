@@ -93,7 +93,7 @@ class TestScreenConfig {
   final Map<UITargetPlatform, List<TestScreenDevice>> devices;
 
   /// Wrapper widget for the screen created.
-  final Widget Function(Widget screen)? wrapper;
+  final Widget Function(WidgetTester tester, Widget screen)? wrapper;
 
   /// Callback called after the screen widget creation.
   final Future<void> Function(WidgetTester tester, Widget screen)?
@@ -111,19 +111,20 @@ class TestScreenConfig {
       : assert(locales.isNotEmpty),
         assert(devices.isNotEmpty);
 
-  factory TestScreenConfig.defaultConfigCopy() {
+  factory TestScreenConfig.defaultConfigCopy(
+      {List<String>? withLocales,
+      Map<UITargetPlatform, List<TestScreenDevice>>? withDevices}) {
     final Map<UITargetPlatform, List<TestScreenDevice>> clonedDevices = {};
     final Map<UITargetPlatform, List<TestScreenDevice>> devices =
-        defaultTestScreenConfig!.devices;
+        withDevices ?? defaultTestScreenConfig!.devices;
     for (final UITargetPlatform key in devices.keys) {
-      clonedDevices[key] = devices[key]!.where((element) => true).toList();
+      clonedDevices[key] = devices[key]!.toList();
     }
     return TestScreenConfig(
         onAfterCreate: defaultTestScreenConfig!.onAfterCreate,
         onBeforeCreate: defaultTestScreenConfig!.onBeforeCreate,
         wrapper: defaultTestScreenConfig!.wrapper,
-        locales:
-            defaultTestScreenConfig!.locales.where((element) => true).toList(),
+        locales: withLocales ?? defaultTestScreenConfig!.locales.toList(),
         devices: clonedDevices);
   }
 }

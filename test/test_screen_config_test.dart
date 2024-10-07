@@ -14,7 +14,7 @@ void main() {
           devices: {
             UITargetPlatform.webLinux: [TestScreenDevice.forWeb(1024, 768)]
           },
-          wrapper: (Widget screen) => const MaterialApp(
+          wrapper: (WidgetTester tester, Widget screen) => const MaterialApp(
                 debugShowCheckedModeBanner: false,
                 showSemanticsDebugger: true,
                 home: Text('Hola'),

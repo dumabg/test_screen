@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:test_screen/test_screen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -19,7 +20,7 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
           TestScreenDevice.forWeb(1280, 1024)
         ]
       },
-      wrapper: (Widget screen) => MaterialApp(
+      wrapper: (WidgetTester tester, Widget screen) => MaterialApp(
             debugShowCheckedModeBanner: false,
             title: 'test_screen Demo',
             theme: ThemeData(

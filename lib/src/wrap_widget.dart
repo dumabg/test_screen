@@ -4,10 +4,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:test_screen/src/test_screen_config.dart';
 
 /// Wraps a widget with the wrapper configured on
 /// [initializeDefaultTestScreenConfig]
-Widget wrapWidget(Widget widget) {
-  return defaultTestScreenConfig?.wrapper?.call(widget) ?? widget;
+Widget wrapWidget(WidgetTester tester, Widget widget) {
+  return defaultTestScreenConfig?.wrapper?.call(tester, widget) ?? widget;
 }

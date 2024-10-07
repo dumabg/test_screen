@@ -115,8 +115,8 @@ void _internalTestScreen(
                   await config!.onBeforeCreate?.call(tester);
                   final Widget screen = await createScreen();
                   await tester.runAsync(() async {
-                    await tester
-                        .pumpWidget(config!.wrapper?.call(screen) ?? screen);
+                    await tester.pumpWidget(
+                        config!.wrapper?.call(tester, screen) ?? screen);
                     await config.onAfterCreate?.call(tester, screen);
                     await tester.pumpAndSettle();
                     await _loadImages(tester);

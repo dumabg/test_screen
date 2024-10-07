@@ -341,7 +341,7 @@ The screen widget to test is created in this order: first `onBeforeCreate` is ca
 If your screen widget needs a parent for running, like `MaterialApp`, use the `wrapper` parameter. The `wrapper` method will be called with the widget screen to test.
 
 ```dart
-    wrapper: (Widget screen) =>
+    wrapper: (WidgetTester tester, Widget screen) =>
           MaterialApp(
             debugShowCheckedModeBanner: false,
             theme: ThemeData(
@@ -350,6 +350,7 @@ If your screen widget needs a parent for running, like `MaterialApp`, use the `w
             home: screen,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocalizations.supportedLocales,
+            locale: tester.platformDispatcher.locale,
           )));
 ```
 
@@ -535,7 +536,7 @@ A wrapper defined in your initializeDefaultTestScreenConfig:
 initializeDefaultTestScreenConfig(
     TestScreenConfig(
       ...
-      wrapper: (Widget screen) =>
+      wrapper: (WidgetTester tester, Widget screen) =>
             MaterialApp(
               debugShowCheckedModeBanner: false,
               theme: ThemeData(
@@ -544,6 +545,7 @@ initializeDefaultTestScreenConfig(
               home: screen,
               localizationsDelegates: AppLocalizations.localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,
+              locale: tester.platformDispatcher.locale,
             )));
 ```
 
@@ -552,12 +554,12 @@ When use wrapWidget in testWidget:
 ```dart
 
  testWidgets('Home', (WidgetTester tester) async {
-    await tester.pumpWidget(wrapWidget(const HomeScreen()));
+    await tester.pumpWidget(wrapWidget(tester, const HomeScreen()));
     final Finder addIcon = find.byIcon(Icons.add);
     ...
 ```
 
-Would be equivalent to:
+Is equivalent to:
 ```dart
 
  testWidgets('Home', (WidgetTester tester) async {
