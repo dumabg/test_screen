@@ -14,6 +14,7 @@ The Golden assertions take longer to execute than traditional widget tests, so i
 
 ## What's new
 - [Fonts](#fonts) in project libraries.
+- [Testing Dialogs or other complex components](#testing-dialogs-or-other-complex-components)
 
 ## Table of Contents
 
@@ -41,6 +42,7 @@ The Golden assertions take longer to execute than traditional widget tests, so i
         - [When use Platform and when ThemeData.platform?](#when-use-platform-and-when-themedataplatform)
         - [ThemeData.platform on web applications](#themedataplatform-on-web-applications)
       - [Golden files shadows](#golden-files-shadows)
+      - [Testing Dialogs or other complex components](#testing-dialogs-or-other-complex-components)
     - [Other utility function / classes](#other-utility-function--classes)
       - [wrapWidget function](#wrapwidget-function)
       - [`WidgetTester` extension.](#widgettester-extension)
@@ -524,6 +526,50 @@ group('Login Screen', () {
     });
   });
 ```
+#### Testing Dialogs or other complex components
+`testScreenUI` creates the golden image with the widget created by the callback function  `createScreen`.
+
+Sometimes needs to create the golden image with another widget. One of this cases is a `Dialog`.
+
+`testScreenUI` has the parameter `onMatchesGoldenFinder` to indicate what widget want to use for creating the golden image.
+
+``` dart
+void testScreenUI(Object description, Future<Widget> Function() createScreen,
+    {Future<void> Function(WidgetTester tester)? onTest,
+    Future<Finder> Function()? onMatchesGoldenFinder,
+    String? goldenDir,
+    TestScreenConfig? config,
+    UITargetPlatform? onlyPlatform})
+```
+In this example, we want to create a golden image of a `Dialog`, that is shown when `showDialog` is invoked:
+
+``` dart
+ testScreenUI(
+      'Dialog',
+      () async => TextButton(
+          onPressed: () => showDialog(NavigatorOf.navigatorKey.currentState!.context),
+          child: const SizedBox.shrink()),
+      onTest: (WidgetTester tester) async {
+        final Finder finder = find.byType(TextButton);
+        expect(finder, findsOneWidget);
+        await tester.tap(finder);
+        await tester.pumpAndSettle();
+      },
+      onMatchesGoldenFinder: () async => find.byType(Dialog));
+  );
+
+
+Future<void> showDialog(BuildContext context) {
+  return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+        ...
+```
+`onMatchesGoldenFinder` is returning the `Finder` about the `Dialog` created by `showDialog`. This is the widget that is finally saved like the golden image.
+
+
 ### Other utility function / classes
 #### wrapWidget function
 Wraps a widget with the wrapper configured on initializeDefaultTestScreenConfig.

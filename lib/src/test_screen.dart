@@ -27,8 +27,10 @@ import 'ui_target_platform.dart';
 @isTestGroup
 void testScreen(Object description, Future<Widget> Function() createScreen,
     Future<void> Function(WidgetTester tester) onTest,
-    {TestScreenConfig? config, UITargetPlatform? onlyPlatform}) {
-  _internalTestScreen(description, createScreen, onTest,
+    {Future<Finder> Function()? onMatchesGoldenFinder,
+    TestScreenConfig? config,
+    UITargetPlatform? onlyPlatform}) {
+  _internalTestScreen(description, createScreen, onTest, onMatchesGoldenFinder,
       config: config, onlyPlatform: onlyPlatform, testUI: false);
 }
 
@@ -39,6 +41,9 @@ void testScreen(Object description, Future<Widget> Function() createScreen,
 /// [createScreen] is a callback function that creates the screen to test.
 /// [onTest] is a callback function called after the screen creation.
 /// Use it to change the state of your screen.
+/// [onMatchesGoldenFinder] is a callback function for returning the Finder
+/// that is used for creating and matching the golden image.
+/// If is null, the widget created in [createScreen] is used.
 /// [goldenDir] is the name of the subdirectory created inside the screens
 /// directory when the golden files are created.
 /// [config] use this config instead of the global configuration defined by
@@ -48,10 +53,11 @@ void testScreen(Object description, Future<Widget> Function() createScreen,
 @isTestGroup
 void testScreenUI(Object description, Future<Widget> Function() createScreen,
     {Future<void> Function(WidgetTester tester)? onTest,
+    Future<Finder> Function()? onMatchesGoldenFinder,
     String? goldenDir,
     TestScreenConfig? config,
     UITargetPlatform? onlyPlatform}) async {
-  _internalTestScreen(description, createScreen, onTest,
+  _internalTestScreen(description, createScreen, onTest, onMatchesGoldenFinder,
       config: config,
       onlyPlatform: onlyPlatform,
       testUI: true,
@@ -63,6 +69,7 @@ void _internalTestScreen(
     Object description,
     Future<Widget> Function() createScreen,
     Future<void> Function(WidgetTester tester)? onTest,
+    Future<Finder> Function()? onMatchesGoldenFinder,
     {required bool testUI,
     TestScreenConfig? config,
     UITargetPlatform? onlyPlatform,
@@ -137,7 +144,10 @@ void _internalTestScreen(
                     final String goldenFileName =
                         '$rootGoldenDir${platformString}_${localeName}_'
                         '${device.id}.png';
-                    await expectLater(find.byWidget(screen),
+                    await expectLater(
+                        onMatchesGoldenFinder == null
+                            ? find.byWidget(screen)
+                            : await onMatchesGoldenFinder.call(),
                         matchesGoldenFile(goldenFileName));
                   }
                   platformDispatcher.clearLocaleTestValue();
