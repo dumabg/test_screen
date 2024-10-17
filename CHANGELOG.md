@@ -1,3 +1,9 @@
+## 3.2.1
+* Bug: Font loader doesn't load MaterialIcons font.
+  
+## 3.2.0
+* Added onMatchesGoldenFinder to testScreen and testScreenUI.
+
 ## 3.1.0
 * Support for fonts when the project is a library.
 * Bug: Async error when the widget has a Future.delayed.
