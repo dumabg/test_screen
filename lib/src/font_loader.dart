@@ -24,11 +24,12 @@ Future<void> loadAppFonts(String? libraryName) async {
     for (final Map<String, dynamic> font
         in fontManifest.cast<Map<String, dynamic>>()) {
       final String fontFamily = derivedFontFamily(font);
-      final fontLoader = FontLoader(fontFamily.startsWith('packages')
-          ? fontFamily
-          : libraryName == null
+      final fontLoader = FontLoader(
+          (fontFamily.startsWith('packages')) || (fontFamily == 'MaterialIcons')
               ? fontFamily
-              : 'packages/$libraryName/$fontFamily');
+              : libraryName == null
+                  ? fontFamily
+                  : 'packages/$libraryName/$fontFamily');
       final dynamic fonts = font['fonts'];
       if (fonts is List) {
         for (final Map<String, dynamic> fontType
