@@ -14,7 +14,6 @@ import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 import 'package:test_screen/test_screen.dart';
 
-import 'stack_trace_source.dart';
 import 'test_screen_config.dart';
 import 'ui_target_platform.dart';
 
@@ -121,23 +120,26 @@ void _internalTestScreen(
                   Intl.systemLocale = localeName;
                   await config!.onBeforeCreate?.call(tester);
                   final Widget screen = await createScreen();
-                  await tester.runAsync(() async {
-                    await tester.pumpWidget(
-                        config!.wrapper?.call(tester, screen) ?? screen);
-                    await config.onAfterCreate?.call(tester, screen);
-                    await tester.pumpAndSettle();
-                    await _loadImages(tester);
-                    await tester.pumpAndSettle();
-                  });
+                  await tester.pumpWidget(
+                      config.wrapper?.call(tester, screen) ?? screen);
+                  await config.onAfterCreate?.call(tester, screen);
+                  await _loadImages(tester);
                   try {
-                    await tester.runAsync(() async {
-                      await onTest?.call(tester);
-                    });
-                  } catch (e, stack) {
+                    await onTest?.call(tester);
+                  } catch (e) {
                     // ignore: avoid_print
                     print('Platform: $platformString. Locale: $localeName. '
                         'Device: ${device.name}.');
-                    await _testFailure(tester, screen, stack);
+                    final String which = '${platformString}_${localeName}_'
+                        '${device.id}';
+                    String path = '';
+                    if (uiGolderDir != null) {
+                      path += uiGolderDir;
+                      if (!rootGoldenDir.endsWith(pathSeparator)) {
+                        path += pathSeparator;
+                      }
+                    }
+                    await _testFailure(tester, screen, path, which);
                     rethrow;
                   }
                   if (testUI) {
@@ -176,7 +178,7 @@ void _initializeTargetPlatform(UITargetPlatform platform) {
 }
 
 Future<void> _testFailure(
-    WidgetTester tester, Widget screen, StackTrace stack) async {
+    WidgetTester tester, Widget screen, String goldenPath, String which) async {
   await tester.pump();
   await tester.runAsync(() async {
     final Element element = tester.firstElement(find.byWidget(screen));
@@ -184,13 +186,17 @@ Future<void> _testFailure(
     final ByteData data =
         await image.toByteData(format: ui.ImageByteFormat.png) ?? ByteData(0);
     final buffer = data.buffer;
-    final File file = stack.source();
-    final File fileName = File(
-        '${file.parent.path}${Platform.pathSeparator}failures/${DateTime.now().millisecondsSinceEpoch}.png');
-    await fileName.create(recursive: true);
+    final String pathSeparator = Platform.pathSeparator;
+    final dir = Directory(
+        '${(goldenFileComparator as LocalFileComparator).basedir.toFilePath()}'
+        'failures$pathSeparator$goldenPath')
+      ..createSync(recursive: true);
+    final dateNow = DateFormat('yyyy_MM_dd_HH_mm_ss').format(DateTime.now());
+    final File fileName =
+        File('${dir.path}$pathSeparator${dateNow}_$which.png');
     // ignore: avoid_print
-    print('UI snapshot on ${fileName.path}');
-    await fileName.writeAsBytes(
+    print('UI failure snapshot on ${fileName.path}');
+    fileName.writeAsBytesSync(
         buffer.asUint8List(data.offsetInBytes, data.lengthInBytes));
   });
 }
