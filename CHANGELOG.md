@@ -1,3 +1,7 @@
+## 3.2.2
+* TestScreenConfig loadTestFont improved, loads from file or rootBundle.
+* TestScreen testFailure improved.
+
 ## 3.2.1
 * Bug: Font loader doesn't load MaterialIcons font.
   
