@@ -3,6 +3,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -151,6 +153,14 @@ Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
 }
 
 Future<void> _loadTestFont(String family, String fileName) async {
-  final fontLoader = FontLoader(family)..addFont(rootBundle.load(fileName));
+  final file = File(fileName);
+  Future<ByteData> fontData;
+  if (file.existsSync()) {
+    final Uint8List fontBytes = file.readAsBytesSync();
+    fontData = Future.value(fontBytes.buffer.asByteData());
+  } else {
+    fontData = rootBundle.load(fileName);
+  }
+  final fontLoader = FontLoader(family)..addFont(fontData);
   await fontLoader.load();
 }
