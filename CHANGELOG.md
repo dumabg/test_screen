@@ -1,3 +1,6 @@
+## 3.2.3
+* Bug: TestScreen hangs on load images.
+  
 ## 3.2.2
 * TestScreenConfig loadTestFont improved, loads from file or rootBundle.
 * TestScreen testFailure improved.
