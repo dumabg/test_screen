@@ -213,22 +213,26 @@ Future<ui.Image> _captureImage(Element element) {
 }
 
 Future<void> _loadImages(WidgetTester tester) async {
-  final imageElements = find.byType(Image, skipOffstage: false).evaluate();
-  final containerElements =
-      find.byType(DecoratedBox, skipOffstage: false).evaluate();
-  for (final imageElement in imageElements) {
-    final widget = imageElement.widget;
-    if (widget is Image) {
-      await precacheImage(widget.image, imageElement);
-    }
-  }
-  for (final container in containerElements) {
-    final widget = container.widget as DecoratedBox;
-    final decoration = widget.decoration;
-    if (decoration is BoxDecoration) {
-      if (decoration.image != null) {
-        await precacheImage(decoration.image!.image, container);
+  await tester.runAsync(() async {
+    final imageElements = find.byType(Image, skipOffstage: false).evaluate();
+    final containerElements =
+        find.byType(DecoratedBox, skipOffstage: false).evaluate();
+    for (final imageElement in imageElements) {
+      final widget = imageElement.widget;
+      if (widget is Image) {
+        await precacheImage(widget.image, imageElement);
+        await tester.pump();
       }
     }
-  }
+    for (final container in containerElements) {
+      final widget = container.widget as DecoratedBox;
+      final decoration = widget.decoration;
+      if (decoration is BoxDecoration) {
+        if (decoration.image != null) {
+          await precacheImage(decoration.image!.image, container);
+          await tester.pump();
+        }
+      }
+    }
+  });
 }
