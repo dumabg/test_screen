@@ -109,8 +109,8 @@ void _internalTestScreen(
                 testWidgets(name, (WidgetTester tester) async {
                   _initializeTargetPlatform(platform);
                   final TestFlutterView view = tester.view
-                    ..physicalSize = device.size / device.devicePixelRatio
-                    ..devicePixelRatio = 1.0;
+                    ..physicalSize = device.size
+                    ..devicePixelRatio = device.devicePixelRatio;
                   final locale = Locale(localeName);
                   final TestPlatformDispatcher platformDispatcher =
                       tester.platformDispatcher
