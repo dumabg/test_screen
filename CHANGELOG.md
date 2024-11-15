@@ -1,3 +1,6 @@
+## 3.3.0
+* Added setUp, tearDown, setUpAll and tearDownAll.
+  
 ## 3.2.3
 * Bug: TestScreen hangs on load images.
   
