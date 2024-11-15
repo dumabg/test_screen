@@ -23,14 +23,41 @@ import 'ui_target_platform.dart';
 /// Every time the test is executed, the screen created by the test is compared
 /// with the png file of the golden dir. This consumes a lot of time.
 /// [testScreen] doesn't do this comparison.
+/// [description] is a test description.
+/// [createScreen] is a callback function that creates the screen to test.
+/// [onTest] is a callback function called after the screen creation.
+/// Use it to change the state of your screen.
+/// [onMatchesGoldenFinder] is a callback function for returning the Finder
+/// that is used for creating and matching the golden image.
+/// If is null, the widget created in [createScreen] is used.
+/// [goldenDir] is the name of the subdirectory created inside the screens
+/// directory when the golden files are created.
+/// [config] use this config instead of the global configuration defined by
+/// [initializeDefaultTestScreenConfig].
+/// [onlyPlatform] execute the tests only for the platform specified, ignoring
+/// the specified on [config] or [initializeDefaultTestScreenConfig].
+/// [setup] Registers a function to be run before tests.
+/// [tearDown] Registers a function to be run after tests.
+/// [setupAll] Registers a function to be run once before all tests.
+/// [tearDownAll] Registers a function to be run after all tests.
 @isTestGroup
 void testScreen(Object description, Future<Widget> Function() createScreen,
     Future<void> Function(WidgetTester tester) onTest,
     {Future<Finder> Function()? onMatchesGoldenFinder,
     TestScreenConfig? config,
-    UITargetPlatform? onlyPlatform}) {
+    UITargetPlatform? onlyPlatform,
+    dynamic Function()? setUp,
+    dynamic Function()? tearDown,
+    dynamic Function()? setUpAll,
+    dynamic Function()? tearDownAll}) {
   _internalTestScreen(description, createScreen, onTest, onMatchesGoldenFinder,
-      config: config, onlyPlatform: onlyPlatform, testUI: false);
+      config: config,
+      onlyPlatform: onlyPlatform,
+      testUI: false,
+      fSetUp: setUp,
+      fTearDown: tearDown,
+      fSetUpAll: setUpAll,
+      fTearDownAll: tearDownAll);
 }
 
 /// Use this function for testing custom [StatelessWidget]s and
@@ -49,18 +76,30 @@ void testScreen(Object description, Future<Widget> Function() createScreen,
 /// [initializeDefaultTestScreenConfig].
 /// [onlyPlatform] execute the tests only for the platform specified, ignoring
 /// the specified on [config] or [initializeDefaultTestScreenConfig].
+/// [setup] Registers a function to be run before tests.
+/// [tearDown] Registers a function to be run after tests.
+/// [setupAll] Registers a function to be run once before all tests.
+/// [tearDownAll] Registers a function to be run after all tests.
 @isTestGroup
 void testScreenUI(Object description, Future<Widget> Function() createScreen,
     {Future<void> Function(WidgetTester tester)? onTest,
     Future<Finder> Function()? onMatchesGoldenFinder,
     String? goldenDir,
     TestScreenConfig? config,
-    UITargetPlatform? onlyPlatform}) async {
+    UITargetPlatform? onlyPlatform,
+    dynamic Function()? setUp,
+    dynamic Function()? tearDown,
+    dynamic Function()? setUpAll,
+    dynamic Function()? tearDownAll}) async {
   _internalTestScreen(description, createScreen, onTest, onMatchesGoldenFinder,
       config: config,
       onlyPlatform: onlyPlatform,
       testUI: true,
-      uiGolderDir: goldenDir);
+      uiGolderDir: goldenDir,
+      fSetUpAll: setUpAll,
+      fTearDownAll: tearDownAll,
+      fSetUp: setUp,
+      fTearDown: tearDown);
 }
 
 @isTestGroup
@@ -72,7 +111,11 @@ void _internalTestScreen(
     {required bool testUI,
     TestScreenConfig? config,
     UITargetPlatform? onlyPlatform,
-    String? uiGolderDir}) async {
+    String? uiGolderDir,
+    dynamic Function()? fSetUp,
+    dynamic Function()? fTearDown,
+    dynamic Function()? fSetUpAll,
+    dynamic Function()? fTearDownAll}) async {
   config = config ?? defaultTestScreenConfig;
   assert(config != null);
   final Map<UITargetPlatform, List<TestScreenDevice>> platformDevices =
@@ -89,6 +132,18 @@ void _internalTestScreen(
   }
   TestWidgetsFlutterBinding.ensureInitialized();
   group(description, () {
+    if (fSetUpAll != null) {
+      setUpAll(fSetUpAll);
+    }
+    if (fTearDownAll != null) {
+      tearDownAll(fTearDownAll);
+    }
+    if (fSetUp != null) {
+      setUp(fSetUp);
+    }
+    if (fTearDown != null) {
+      tearDown(fTearDown);
+    }
     for (final UITargetPlatform platform in platforms) {
       final List<TestScreenDevice>? devices = platformDevices[platform];
       if ((devices == null) || (devices.isEmpty)) {
