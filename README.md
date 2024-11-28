@@ -13,8 +13,7 @@ Goldens aren't intended to be a replacement of typical behavioral widget testing
 The Golden assertions take longer to execute than traditional widget tests, so it is recommended to be intentional about when they are used. Additionally, they can have many reasons to change. Often, the primary reason a golden test will fail is because of an intentional change. Thankfully, Flutter makes it easy to regenerate new reference images.
 
 ## What's new
-- [Fonts](#fonts) in project libraries.
-- [Testing Dialogs or other complex components](#testing-dialogs-or-other-complex-components)
+- [Fonts loadSimulatedPlatformFonts](#fonts). Allow to test_screen load simulated platform fonts.
 
 ## Table of Contents
 
@@ -36,6 +35,8 @@ The Golden assertions take longer to execute than traditional widget tests, so i
       - [Adding Android / iOS devices from Firebase Test Lab](#adding-android--ios-devices-from-firebase-test-lab)
       - [Adding web screens](#adding-web-screens)
       - [Fonts](#fonts)
+        - [Understanding loadSimulatedPlatformFonts](#understanding-loadsimulatedplatformfonts)
+          - [What can loadSimulatedPlatformFonts = false be used for?](#what-can-loadsimulatedplatformfonts--false-be-used-for)
       - [Other TestScreenConfig parameters](#other-testscreenconfig-parameters)
     - [Create screen tests](#create-screen-tests)
       - [Platform vs ThemeData.platform](#platform-vs-themedataplatform)
@@ -321,7 +322,7 @@ The defaults values are:
 ```
 
 #### Fonts
-By default, all the fonts used in the project are loaded automatically.
+By default, all the fonts used in the project are loaded automatically and platform system fonts are simulated.
 
 `initializeDefaultTestScreenConfig` allows to fine tuning the fonts loaded.
 
@@ -329,11 +330,89 @@ By default, all the fonts used in the project are loaded automatically.
 Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
     {List<TestScreenFont> fonts = const [],
     bool loadDefaultFonts = true,
+    bool loadSimulatedPlatformFonts = true,
     String? libraryName})
 ```
 - `fonts`: Load these fonts.
 - `loadDefaultFonts`: Controls if load all the fonts used in the project or not.
+- `loadSimulatedPlatformFonts`: loads simulated fonts for the different target platforms:
+    - Android: Roboto font.
+    - iOS: SFProDisplay and SFProText fonts.
+    - Other: Roboto font.
+  
+   For all the platforms, font family fallback loads NotoColorEmoji. This allows to show emojis.
 - `libraryName`: If the project is a library, specify the library name. If not specified, fonts declared in pubspec can't load it.
+
+
+##### Understanding loadSimulatedPlatformFonts
+Different platforms, like Android or iOS, have system fonts. To simulate this system fonts, test_screen includes a series of fonts for simulating it. If `loadSimulatedPlatformFonts` is true (the default), these simulated fonts are loaded automatically.
+
+For example in this code:
+```dart
+Column(
+  children: [
+    Text("Time's up",
+         style: const TextStyle(
+              fontSize: 30,
+              color: Colors.white)),
+    Text('😔', style: TextStyle(fontSize: 42))
+  ])
+```
+Both Text font family defaults to system default. On Android font Roboto, on iOS font SF, ... 
+
+If `loadSimulatedPlatformFonts` = false, no system emulated fonts are loaded. 
+
+Like system fonts aren't in your project, the result is:
+
+![loadSimulatedPlatformFonts false](resources/loadSimulatedPlatformFonts_false.png)
+
+If you specify a fontFamily that exist in your project:
+
+```dart
+Column(
+  children: [
+    Text("Time's up",
+         style: const TextStyle(
+              fontFamily: 'myAppFontFamily',
+              fontSize: 30,
+              color: Colors.white)),
+    Text('😔',
+         style: TextStyle(
+              fontFamily: 'myAppFontFamily',
+              fontSize: 42))
+  ])
+```
+Like `loadDefaultFonts` = true, and the myAppFontFamily is in your project, font is loaded, given this result:
+
+![loadSimulatedPlatformFonts false with fontFamily](resources/loadSimulatedPlatformFonts_false_text.png)
+
+What happen's with the emoji? Why is a rectangle?
+
+Like your font hasn't all the UTF codes supported, Flutter tries to paint it with the system default font for emojis, but how doesn't exist, it paints a rectangle.
+
+If `loadSimulatedPlatformFonts` = true, the system emulated fonts are loaded. Like the second Text with the emoticon isn't supported by your myAppFontFamily, it falls back to the system default font for emojis, that now, test_screen is emulating with the NotoColorEmoji font. The result is:
+
+![loadSimulatedPlatformFonts true with fontFamily](resources/loadSimulatedPlatformFonts_true_text.png)
+
+Now, the first code example, without fontFamily
+```dart
+Column(
+  children: [
+    Text("Time's up",
+         style: const TextStyle(
+              fontSize: 30,
+              color: Colors.white)),
+    Text('😔', style: TextStyle(fontSize: 42))
+  ])
+```
+will paint the Text with simulated fonts: First Text with Roboto for Android, SF for iOS, ..., and the second text (the emoji) with NotoColorEmoji. The result is:
+
+![loadSimulatedPlatformFonts true](resources/loadSimulatedPlatformFonts_true.png)
+
+###### What can loadSimulatedPlatformFonts = false be used for?
+If you want to find the texts that hasn't specified an application font family and falls on the default system fonts, put `loadSimulatedPlatformFonts` = false. 
+
+The texts appears with the default Ahem test font, and only see the rectangles.
 
 
 #### Other TestScreenConfig parameters

@@ -134,19 +134,28 @@ class TestScreenConfig {
 /// Default [TestScreenConfig] for all the screen tests.
 TestScreenConfig? defaultTestScreenConfig;
 
+String? projectLibraryName;
+
 /// Initialize the default configuration for all the screen tests.
 /// [fonts] are a list of fonts to use in the screen test.
 /// [loadDefaultFonts] loads all the fonts that you have on your project,
-/// additionally test_screen have Roboto font for Android and
-/// SFProDisplay-Regular and SFProText-Regular for iOS.
+/// [loadSimulatedPlatformFonts] loads simulated fonts for the different
+/// target platforms:
+///   Android: Roboto font.
+///   iOS: SFProDisplay-Regular and SFProText-Regular fonts.
+///   Other: Roboto font.
+/// For all the platforms, font family fallback loads NotoColorEmoji-Regular.
+/// This allows to use emojis.
+/// [libraryName] If the project is a library, the name of the library.
+/// Fonts can't load correctly if isn't specified.
 Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
     {List<TestScreenFont> fonts = const [],
     bool loadDefaultFonts = true,
+    bool loadSimulatedPlatformFonts = true,
     String? libraryName}) async {
+  projectLibraryName = libraryName;
   defaultTestScreenConfig = config;
-  if (loadDefaultFonts) {
-    await loadAppFonts(libraryName);
-  }
+  await loadAppFonts(libraryName, loadDefaultFonts, loadSimulatedPlatformFonts);
   for (final TestScreenFont font in fonts) {
     await _loadTestFont(font.family, font.fileName);
   }

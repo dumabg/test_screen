@@ -53,6 +53,15 @@ flutter:
     - family: .SF UI Display
       fonts:
         - asset: packages/test_screen/fonts/SFProDisplay-Regular.ttf
+    - family: .SF Pro Text
+      fonts:
+        - asset: packages/test_screen/fonts/SFProText-Regular.ttf
+    - family: .SF Pro Display
+      fonts:
+        - asset: packages/test_screen/fonts/SFProDisplay-Regular.ttf
+    - family: NotoColorEmoji
+      fonts:
+        - asset: packages/test_screen/fonts/NotoColorEmoji-Regular.ttf
  
   # For details regarding fonts in packages, see
   # https://flutter.dev/custom-fonts/#from-packages

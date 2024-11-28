@@ -130,6 +130,8 @@ void _internalTestScreen(
       rootGoldenDir += pathSeparator;
     }
   }
+  final String fontFamilyPrefix =
+      projectLibraryName == null ? '' : 'packages/$projectLibraryName/';
   TestWidgetsFlutterBinding.ensureInitialized();
   group(description, () {
     if (fSetUpAll != null) {
@@ -150,6 +152,8 @@ void _internalTestScreen(
         // ignore: avoid_print
         print('No devices for $platform');
       } else {
+        final TextStyle? defaultTextStyle =
+            _defaultTextStyle(fontFamilyPrefix, platform);
         final String platformString =
             platform.toString().substring('UITargetPlatform.'.length);
         group(platformString, () {
@@ -174,9 +178,13 @@ void _internalTestScreen(
                   Intl.defaultLocale = localeName;
                   Intl.systemLocale = localeName;
                   await config!.onBeforeCreate?.call(tester);
-                  final Widget screen = await createScreen();
-                  await tester.pumpWidget(
-                      config.wrapper?.call(tester, screen) ?? screen);
+                  final Widget screen = defaultTextStyle == null
+                      ? await createScreen()
+                      : DefaultTextStyle(
+                          style: defaultTextStyle, child: await createScreen());
+                  final Widget screenWrapped =
+                      config.wrapper?.call(tester, screen) ?? screen;
+                  await tester.pumpWidget(screenWrapped);
                   await config.onAfterCreate?.call(tester, screen);
                   await _loadImages(tester);
                   try {
@@ -221,6 +229,17 @@ void _internalTestScreen(
       }
     }
   });
+}
+
+TextStyle? _defaultTextStyle(
+    String fontFamilyPrefix, UITargetPlatform platform) {
+  return TextStyle(
+      fontFamily: switch (platform) {
+        UITargetPlatform.android => '${fontFamilyPrefix}Roboto',
+        UITargetPlatform.iOS => '$fontFamilyPrefix.SF Pro Text',
+        _ => '${fontFamilyPrefix}Roboto'
+      },
+      fontFamilyFallback: ['packages/test_screen/NotoColorEmoji']);
 }
 
 void _initializeTargetPlatform(UITargetPlatform platform) {
