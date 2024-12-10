@@ -1,3 +1,7 @@
+## 3.4.0
+* Added loadSimulatedPlatformFonts on TestScreenConfig.
+* Added NotoColorEmoji font for simulating system emojis text.
+
 ## 3.3.0
 * Added setUp, tearDown, setUpAll and tearDownAll.
   
