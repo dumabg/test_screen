@@ -205,7 +205,7 @@ void _internalTestScreen(
                         path += pathSeparator;
                       }
                     }
-                    await _testFailure(tester, screen, path, which);
+                    await _testFailure(tester, screenWrapped, path, which);
                     rethrow;
                   }
                   if (testUI) {
