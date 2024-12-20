@@ -178,12 +178,15 @@ void _internalTestScreen(
                   Intl.defaultLocale = localeName;
                   Intl.systemLocale = localeName;
                   await config!.onBeforeCreate?.call(tester);
-                  final Widget screen = defaultTextStyle == null
-                      ? await createScreen()
-                      : DefaultTextStyle(
-                          style: defaultTextStyle, child: await createScreen());
-                  final Widget screenWrapped =
-                      config.wrapper?.call(tester, screen) ?? screen;
+                  final Widget screen = await createScreen();
+                  final Widget screenWithDefaultTextStyle =
+                      defaultTextStyle == null
+                          ? screen
+                          : DefaultTextStyle(
+                              style: defaultTextStyle, child: screen);
+                  final Widget screenWrapped = config.wrapper
+                          ?.call(tester, screenWithDefaultTextStyle) ??
+                      screenWithDefaultTextStyle;
                   await tester.pumpWidget(screenWrapped);
                   await config.onAfterCreate?.call(tester, screen);
                   await _loadImages(tester);
