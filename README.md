@@ -231,7 +231,7 @@ Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
 `flutter_test_config.dart` example:
 ```dart
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
-  initializeDefaultTestScreenConfig(
+  await initializeDefaultTestScreenConfig(
     TestScreenConfig(
       locales: [
         'es',

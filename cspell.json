@@ -1,6 +1,9 @@
 {
     "version": "0.2",
-    "ignorePaths": [],
+    "ignorePaths": [
+        "lib/fonts/trocea.sh",
+        "cspell.json"
+    ],
     "dictionaryDefinitions": [],
     "dictionaries": [],
     "words": [
@@ -10,6 +13,8 @@
         "goldens",
         "Goldens",
         "isweb",
+        "noto",
+        "notocoloremoji",
         "overridable",
         "precache",
         "pubspec",

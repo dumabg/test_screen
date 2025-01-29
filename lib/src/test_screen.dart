@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
+import 'package:test_screen/src/font_loader.dart';
 import 'package:test_screen/test_screen.dart';
 
 import 'test_screen_config.dart';
@@ -130,13 +131,14 @@ void _internalTestScreen(
       rootGoldenDir += pathSeparator;
     }
   }
-  final String fontFamilyPrefix =
-      projectLibraryName == null ? '' : 'packages/$projectLibraryName/';
-  TestWidgetsFlutterBinding.ensureInitialized();
   group(description, () {
-    if (fSetUpAll != null) {
-      setUpAll(fSetUpAll);
-    }
+    setUpAll(() async {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      if (config != defaultTestScreenConfig) {
+        await loadAppFonts(config!);
+      }
+      fSetUpAll?.call();
+    });
     if (fTearDownAll != null) {
       tearDownAll(fTearDownAll);
     }
@@ -152,11 +154,13 @@ void _internalTestScreen(
         // ignore: avoid_print
         print('No devices for $platform');
       } else {
-        final TextStyle? defaultTextStyle =
-            _defaultTextStyle(fontFamilyPrefix, platform);
         final String platformString =
             platform.toString().substring('UITargetPlatform.'.length);
         group(platformString, () {
+          TextStyle? defaultTextStyle;
+          setUpAll(() {
+            defaultTextStyle = _defaultTextStyle(platform);
+          });
           for (final String localeName in config!.locales) {
             for (final TestScreenDevice device in devices) {
               group(localeName, () {
@@ -183,7 +187,7 @@ void _internalTestScreen(
                       defaultTextStyle == null
                           ? screen
                           : DefaultTextStyle(
-                              style: defaultTextStyle, child: screen);
+                              style: defaultTextStyle!, child: screen);
                   final Widget screenWrapped = config.wrapper
                           ?.call(tester, screenWithDefaultTextStyle) ??
                       screenWithDefaultTextStyle;
@@ -234,13 +238,11 @@ void _internalTestScreen(
   });
 }
 
-TextStyle? _defaultTextStyle(
-    String fontFamilyPrefix, UITargetPlatform platform) {
+TextStyle? _defaultTextStyle(UITargetPlatform platform) {
   return TextStyle(
       fontFamily: switch (platform) {
-        UITargetPlatform.android => '${fontFamilyPrefix}Roboto',
-        UITargetPlatform.iOS => '$fontFamilyPrefix.SF Pro Text',
-        _ => '${fontFamilyPrefix}Roboto'
+        UITargetPlatform.iOS => '.SF Pro Text',
+        _ => 'Roboto'
       },
       fontFamilyFallback: ['packages/test_screen/NotoColorEmoji']);
 }

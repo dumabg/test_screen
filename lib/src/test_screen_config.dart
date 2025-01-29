@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:test_screen/src/simulated_platform_fonts.dart';
 import 'package:test_screen/test_screen.dart';
 
 import 'font_loader.dart';
@@ -104,18 +105,41 @@ class TestScreenConfig {
   /// Callback called before the screen widget creation.
   final Future<void> Function(WidgetTester tester)? onBeforeCreate;
 
+  /// List of fonts for using in the screen test.
+  final List<TestScreenFont> fonts;
+
+  /// Loads all the fonts that you have on your project,
+  final bool loadDefaultFonts;
+
+  /// Specify which simulated fonts are loaded for target platforms:
+  ///   Android: Roboto font.
+  ///   iOS: SFProDisplay-Regular and SFProText-Regular fonts.
+  ///   Other: Roboto font.
+  /// For all the platforms, font family fallback is NotoColorEmoji-Regular.
+  /// This allows to use emojis.
+  final Set<SimulatedPlatformFonts> loadSimulatedPlatformFonts;
+
   TestScreenConfig(
       {required this.locales,
       required this.devices,
       this.wrapper,
       this.onBeforeCreate,
-      this.onAfterCreate})
+      this.onAfterCreate,
+      this.fonts = const [],
+      this.loadDefaultFonts = true,
+      this.loadSimulatedPlatformFonts = const {
+        SimulatedPlatformFonts.roboto,
+        SimulatedPlatformFonts.sfProText,
+      }})
       : assert(locales.isNotEmpty),
         assert(devices.isNotEmpty);
 
   factory TestScreenConfig.defaultConfigCopy(
       {List<String>? withLocales,
-      Map<UITargetPlatform, List<TestScreenDevice>>? withDevices}) {
+      Map<UITargetPlatform, List<TestScreenDevice>>? withDevices,
+      List<TestScreenFont>? withFonts,
+      bool? withLoadDefaultFonts,
+      Set<SimulatedPlatformFonts>? withLoadSimulatedPlatformFonts}) {
     final Map<UITargetPlatform, List<TestScreenDevice>> clonedDevices = {};
     final Map<UITargetPlatform, List<TestScreenDevice>> devices =
         withDevices ?? defaultTestScreenConfig!.devices;
@@ -127,7 +151,12 @@ class TestScreenConfig {
         onBeforeCreate: defaultTestScreenConfig!.onBeforeCreate,
         wrapper: defaultTestScreenConfig!.wrapper,
         locales: withLocales ?? defaultTestScreenConfig!.locales.toList(),
-        devices: clonedDevices);
+        devices: clonedDevices,
+        fonts: withFonts ?? defaultTestScreenConfig!.fonts,
+        loadDefaultFonts:
+            withLoadDefaultFonts ?? defaultTestScreenConfig!.loadDefaultFonts,
+        loadSimulatedPlatformFonts: withLoadSimulatedPlatformFonts ??
+            defaultTestScreenConfig!.loadSimulatedPlatformFonts);
   }
 }
 
@@ -137,26 +166,15 @@ TestScreenConfig? defaultTestScreenConfig;
 String? projectLibraryName;
 
 /// Initialize the default configuration for all the screen tests.
-/// [fonts] are a list of fonts to use in the screen test.
-/// [loadDefaultFonts] loads all the fonts that you have on your project,
-/// [loadSimulatedPlatformFonts] loads simulated fonts for the different
-/// target platforms:
-///   Android: Roboto font.
-///   iOS: SFProDisplay-Regular and SFProText-Regular fonts.
-///   Other: Roboto font.
-/// For all the platforms, font family fallback loads NotoColorEmoji-Regular.
-/// This allows to use emojis.
 /// [libraryName] If the project is a library, the name of the library.
 /// Fonts can't load correctly if isn't specified.
 Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
-    {List<TestScreenFont> fonts = const [],
-    bool loadDefaultFonts = true,
-    bool loadSimulatedPlatformFonts = true,
-    String? libraryName}) async {
+    {String? libraryName}) async {
+  TestWidgetsFlutterBinding.ensureInitialized();
   projectLibraryName = libraryName;
   defaultTestScreenConfig = config;
-  await loadAppFonts(libraryName, loadDefaultFonts, loadSimulatedPlatformFonts);
-  for (final TestScreenFont font in fonts) {
+  await loadAppFonts(config);
+  for (final TestScreenFont font in config.fonts) {
     await _loadTestFont(font.family, font.fileName);
   }
 }

@@ -12,7 +12,8 @@ include: package:flutter_lints/flutter.yaml
 # https://dart.dev/guides/language/analysis-options
 analyzer:
   exclude: [
-    "lib/l10n"
+    "lib/l10n",
+    "lib/fonts/**"
   ]
   language:
     strict-casts: true

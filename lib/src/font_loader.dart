@@ -1,111 +1,117 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:test_screen/fonts/roboto_regular.dart';
+import 'package:test_screen/fonts/sf_pro_display_regular.dart';
+import 'package:test_screen/fonts/sf_pro_text_regular.dart';
+import 'package:test_screen/src/test_screen_config.dart';
+
+import '../fonts/notocoloremoji_regular_parts/notocoloremoji_regular.dart';
+import 'simulated_platform_fonts.dart';
+
+class _FontLoaderService {
+  final List<String> _loaded = [];
+
+  bool isLoaded(String family) => _loaded.contains(family);
+
+  Future<void> load(String family, Uint8List font) async {
+    final fontLoader = FontLoader(family)
+      ..addFont(Future.value(ByteData.sublistView(font)));
+    await fontLoader.load();
+    _loaded.add(family);
+  }
+
+  Future<void> loadBundleFonts(String family, List<String> fonts) async {
+    final fontLoader = FontLoader(family);
+    for (final String font in fonts) {
+      fontLoader.addFont(rootBundle.load(font));
+    }
+    await fontLoader.load();
+    _loaded.add(family);
+  }
+}
+
+final _fontLoaderService = _FontLoaderService();
 
 /// By default, flutter test only uses a single "test" font called Ahem.
 ///
 /// This font is designed to show black spaces for every character and icon.
 /// This obviously makes goldens much less valuable.
 ///
-/// [loadDefaultFonts] load any fonts included in your pubspec.yaml as well as
-/// from packages you depend on.
-/// If the project is a library, the fonts can't load correctly if the
-/// [libraryName] parameter isn't specified.
-/// [loadSimulatedPlatformFonts] loads simulated fonts for the different
-/// target platforms:
-///   Android: Roboto font.
-///   iOS: SFProDisplay-Regular and SFProText-Regular fonts.
-///   Other: Roboto font.
-/// For all the platforms, font family fallback loads NotoColorEmoji-Regular.
-/// This allows to use emojis.
-Future<void> loadAppFonts(String? libraryName, bool loadDefaultFonts,
-    bool loadSimulatedPlatformFonts) async {
-  TestWidgetsFlutterBinding.ensureInitialized();
-  final dynamic fontManifest = await rootBundle.loadStructuredData<dynamic>(
-    'FontManifest.json',
-    (string) async => json.decode(string),
-  );
+/// Loads app and emulated system fonts
+Future<void> loadAppFonts(TestScreenConfig config) async {
+  if (config.loadDefaultFonts) {
+    final dynamic fontManifest = await rootBundle.loadStructuredData<dynamic>(
+      'FontManifest.json',
+      (string) async => json.decode(string),
+    );
 
-  if (fontManifest is List) {
-    for (final Map<String, dynamic> font
-        in fontManifest.cast<Map<String, dynamic>>()) {
-      final String fontFamily =
-          derivedFontFamily(font, loadDefaultFonts, loadSimulatedPlatformFonts);
-      final fontLoader = FontLoader(
-          (fontFamily.startsWith('packages')) || (fontFamily == 'MaterialIcons')
-              ? fontFamily
-              : libraryName == null
-                  ? fontFamily
-                  : 'packages/$libraryName/$fontFamily');
-      final dynamic fonts = font['fonts'];
-      if (fonts is List) {
-        for (final Map<String, dynamic> fontType
-            in fonts.cast<Map<String, dynamic>>()) {
-          fontLoader.addFont(rootBundle.load(fontType['asset'] as String));
-        }
-        await fontLoader.load();
-      }
-    }
-  }
-}
-
-/// There is no way to easily load the Roboto or Cupertino fonts.
-/// To make them available in tests, a package needs to include their own copies
-/// of them.
-///
-/// GoldenToolkit supplies Roboto because it is free to use.
-///
-/// However, when a downstream package includes a font, the font family will be
-/// prefixed with /packages/<package name>/<fontFamily> in order to disambiguate
-/// when multiple packages include fonts with the same name.
-///
-/// Ultimately, the font loader will load whatever we tell it, so if we see a
-/// font that looks like a Material or Cupertino font family, let's treat it as
-/// the main font family.
-@visibleForTesting
-String derivedFontFamily(Map<String, dynamic> fontDefinition,
-    bool loadDefaultFonts, bool loadSimulatedPlatformFonts) {
-  if (!fontDefinition.containsKey('family')) {
-    return '';
-  }
-
-  final String fontFamily = fontDefinition['family'] as String;
-  if (fontFamily == 'packages/test_screen/NotoColorEmoji') {
-    return loadSimulatedPlatformFonts ? fontFamily : '';
-  }
-
-  if (_overridableFonts.contains(fontFamily)) {
-    return loadSimulatedPlatformFonts ? fontFamily : '';
-  }
-
-  if (fontFamily.startsWith('packages/')) {
-    final fontFamilyName = fontFamily.split('/').last;
-    if (_overridableFonts.any((font) => font == fontFamilyName)) {
-      return loadSimulatedPlatformFonts ? fontFamilyName : '';
-    }
-  } else {
-    if (loadDefaultFonts) {
-      final dynamic fonts = fontDefinition['fonts'];
-      if (fonts is List) {
-        for (final Map<String, dynamic> fontType
-            in fonts.cast<Map<String, dynamic>>()) {
-          final String? asset = fontType['asset'] as String?;
-          if (asset != null && asset.startsWith('packages')) {
-            final packageName = asset.split('/')[1];
-            return 'packages/$packageName/$fontFamily';
+    if (fontManifest is List) {
+      for (final Map<String, dynamic> font
+          in fontManifest.cast<Map<String, dynamic>>()) {
+        final String manifestFamily = font['family'] as String? ?? '';
+        final String family = (manifestFamily.startsWith('packages')) ||
+                (manifestFamily == 'MaterialIcons')
+            ? manifestFamily
+            : projectLibraryName == null
+                ? manifestFamily
+                : 'packages/$projectLibraryName/$manifestFamily';
+        if (!_fontLoaderService.isLoaded(family)) {
+          final dynamic manifestFonts = font['fonts'];
+          if (manifestFonts is List) {
+            final List<String> fonts = [];
+            for (final Map<String, dynamic> fontType
+                in manifestFonts.cast<Map<String, dynamic>>()) {
+              fonts.add(fontType['asset'] as String);
+            }
+            await _fontLoaderService.loadBundleFonts(family, fonts);
           }
         }
       }
     }
   }
-  return loadDefaultFonts ? fontFamily : '';
+
+  final Set<SimulatedPlatformFonts> loadSimulatedPlatformFonts =
+      config.loadSimulatedPlatformFonts;
+  if (loadSimulatedPlatformFonts.isNotEmpty) {
+    await _loadSimulatedPlatformFonts(loadSimulatedPlatformFonts);
+  }
 }
 
-const List<String> _overridableFonts = [
-  'Roboto',
-  '.SF UI Display',
-  '.SF UI Text',
-  '.SF Pro Text',
-  '.SF Pro Display',
-];
+Future<void> _loadSimulatedPlatformFonts(
+    Set<SimulatedPlatformFonts> simulatedPlatformFonts) async {
+  for (final simulatedPlatformFont in simulatedPlatformFonts) {
+    switch (simulatedPlatformFont) {
+      case SimulatedPlatformFonts.roboto:
+        final family = 'Roboto';
+        if (!_fontLoaderService.isLoaded(family)) {
+          await _fontLoaderService.load(family, fontRobotoRegular());
+        }
+      case SimulatedPlatformFonts.sfProText:
+        final family = '.SF Pro Text';
+        if (!_fontLoaderService.isLoaded(family)) {
+          await _fontLoaderService.load(family, fontSfProTextRegular());
+        }
+      case SimulatedPlatformFonts.sfProDisplay:
+        final family = '.SF Pro Display';
+        if (!_fontLoaderService.isLoaded(family)) {
+          await _fontLoaderService.load(family, fontSfProDisplayRegular());
+        }
+      case SimulatedPlatformFonts.sfUIText:
+        final family = '.SF UI Text';
+        if (!_fontLoaderService.isLoaded(family)) {
+          await _fontLoaderService.load(family, fontSfProTextRegular());
+        }
+      case SimulatedPlatformFonts.sfUIDisplay:
+        final family = '.SF UI Display';
+        if (!_fontLoaderService.isLoaded(family)) {
+          await _fontLoaderService.load(family, fontSfProDisplayRegular());
+        }
+      case SimulatedPlatformFonts.notoColorEmoji:
+        final family = 'packages/test_screen/NotoColorEmoji';
+        if (!_fontLoaderService.isLoaded(family)) {
+          await _fontLoaderService.load(family, font_notocoloremoji_regular());
+        }
+    }
+  }
+}

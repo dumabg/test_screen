@@ -29,8 +29,6 @@ flutter:
 
   # To add assets to your package, add an assets section, like this:
   # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
   #
   # For details regarding assets in packages, see
   # https://flutter.dev/assets-and-images/#from-packages
@@ -43,25 +41,6 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  fonts:
-    - family: Roboto
-      fonts:
-        - asset: packages/test_screen/fonts/Roboto-Regular.ttf
-    - family: .SF UI Text
-      fonts:
-        - asset: packages/test_screen/fonts/SFProText-Regular.ttf
-    - family: .SF UI Display
-      fonts:
-        - asset: packages/test_screen/fonts/SFProDisplay-Regular.ttf
-    - family: .SF Pro Text
-      fonts:
-        - asset: packages/test_screen/fonts/SFProText-Regular.ttf
-    - family: .SF Pro Display
-      fonts:
-        - asset: packages/test_screen/fonts/SFProDisplay-Regular.ttf
-    - family: NotoColorEmoji
-      fonts:
-        - asset: packages/test_screen/fonts/NotoColorEmoji-Regular.ttf
- 
+  #fonts: 
   # For details regarding fonts in packages, see
   # https://flutter.dev/custom-fonts/#from-packages
