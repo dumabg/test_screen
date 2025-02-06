@@ -165,13 +165,17 @@ TestScreenConfig? defaultTestScreenConfig;
 
 String? projectLibraryName;
 
+Directory? fontCacheDirectory;
+
 /// Initialize the default configuration for all the screen tests.
 /// [libraryName] If the project is a library, the name of the library.
 /// Fonts can't load correctly if isn't specified.
 Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
-    {String? libraryName}) async {
+    {String? libraryName,
+    Directory? simulatedPlatformFontsCacheDirectory}) async {
   TestWidgetsFlutterBinding.ensureInitialized();
   projectLibraryName = libraryName;
+  fontCacheDirectory = simulatedPlatformFontsCacheDirectory;
   defaultTestScreenConfig = config;
   await loadAppFonts(config);
   for (final TestScreenFont font in config.fonts) {

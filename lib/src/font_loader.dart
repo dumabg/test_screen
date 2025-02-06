@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:path/path.dart' as $path;
 import 'package:test_screen/fonts/roboto_regular.dart';
 import 'package:test_screen/fonts/sf_pro_display_regular.dart';
 import 'package:test_screen/fonts/sf_pro_text_regular.dart';
@@ -78,6 +81,21 @@ Future<void> loadAppFonts(TestScreenConfig config) async {
   }
 }
 
+Uint8List _getFont(String fontFileName, Uint8List Function() fontLoader) {
+  if (fontCacheDirectory != null) {
+    final file = File($path.join(fontCacheDirectory!.path, fontFileName));
+    if (file.existsSync()) {
+      return file.readAsBytesSync();
+    } else {
+      final Uint8List font = fontLoader();
+      file.writeAsBytesSync(font);
+      return font;
+    }
+  } else {
+    return fontLoader();
+  }
+}
+
 Future<void> _loadSimulatedPlatformFonts(
     Set<SimulatedPlatformFonts> simulatedPlatformFonts) async {
   for (final simulatedPlatformFont in simulatedPlatformFonts) {
@@ -85,32 +103,44 @@ Future<void> _loadSimulatedPlatformFonts(
       case SimulatedPlatformFonts.roboto:
         final family = 'Roboto';
         if (!_fontLoaderService.isLoaded(family)) {
-          await _fontLoaderService.load(family, fontRobotoRegular());
+          final Uint8List font =
+              _getFont('Roboto-Regular.ttf', fontRobotoRegular);
+          await _fontLoaderService.load(family, font);
         }
       case SimulatedPlatformFonts.sfProText:
         final family = '.SF Pro Text';
         if (!_fontLoaderService.isLoaded(family)) {
-          await _fontLoaderService.load(family, fontSfProTextRegular());
+          final Uint8List font =
+              _getFont('SFProText-Regular.ttf', fontSfProTextRegular);
+          await _fontLoaderService.load(family, font);
         }
       case SimulatedPlatformFonts.sfProDisplay:
         final family = '.SF Pro Display';
         if (!_fontLoaderService.isLoaded(family)) {
-          await _fontLoaderService.load(family, fontSfProDisplayRegular());
+          final Uint8List font =
+              _getFont('SFProDisplay-Regular.ttf', fontSfProDisplayRegular);
+          await _fontLoaderService.load(family, font);
         }
       case SimulatedPlatformFonts.sfUIText:
         final family = '.SF UI Text';
         if (!_fontLoaderService.isLoaded(family)) {
-          await _fontLoaderService.load(family, fontSfProTextRegular());
+          final Uint8List font =
+              _getFont('SFProText-Regular.ttf', fontSfProTextRegular);
+          await _fontLoaderService.load(family, font);
         }
       case SimulatedPlatformFonts.sfUIDisplay:
         final family = '.SF UI Display';
         if (!_fontLoaderService.isLoaded(family)) {
-          await _fontLoaderService.load(family, fontSfProDisplayRegular());
+          final Uint8List font =
+              _getFont('SFProDisplay-Regular.ttf', fontSfProDisplayRegular);
+          await _fontLoaderService.load(family, font);
         }
       case SimulatedPlatformFonts.notoColorEmoji:
         final family = 'packages/test_screen/NotoColorEmoji';
         if (!_fontLoaderService.isLoaded(family)) {
-          await _fontLoaderService.load(family, font_notocoloremoji_regular());
+          final Uint8List font = _getFont(
+              'NotoColorEmoji-Regular.ttf', font_notocoloremoji_regular);
+          await _fontLoaderService.load(family, font);
         }
     }
   }

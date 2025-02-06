@@ -13,7 +13,12 @@ Goldens aren't intended to be a replacement of typical behavioral widget testing
 The Golden assertions take longer to execute than traditional widget tests, so it is recommended to be intentional about when they are used. Additionally, they can have many reasons to change. Often, the primary reason a golden test will fail is because of an intentional change. Thankfully, Flutter makes it easy to regenerate new reference images.
 
 ## What's new
-- [Fonts loadSimulatedPlatformFonts](#fonts). Allow to test_screen load simulated platform fonts.
+
+- Fonts breaking change. Now initialized on `TestScreenConfig`. See [Fonts](#fonts).
+  
+- [IMPORTANT: initializeDefaultTestScreenConfig simulatedPlatformFontsCacheDirectory](#important-initializedefaulttestscreenconfig-simulatedplatformfontscachedirectory)
+
+- [Loading emoji font only when needed](#loading-emoji-font-only-when-needed)
 
 ## Table of Contents
 
@@ -36,7 +41,10 @@ The Golden assertions take longer to execute than traditional widget tests, so i
       - [Adding web screens](#adding-web-screens)
       - [Fonts](#fonts)
         - [Understanding loadSimulatedPlatformFonts](#understanding-loadsimulatedplatformfonts)
-          - [What can loadSimulatedPlatformFonts = false be used for?](#what-can-loadsimulatedplatformfonts--false-be-used-for)
+          - [What purpose can be serve if loadSimulatedPlatformFonts is empty?](#what-purpose-can-be-serve-if-loadsimulatedplatformfonts-is-empty)
+          - [IMPORTANT: initializeDefaultTestScreenConfig simulatedPlatformFontsCacheDirectory](#important-initializedefaulttestscreenconfig-simulatedplatformfontscachedirectory)
+          - [Loading emoji font only when needed](#loading-emoji-font-only-when-needed)
+        - [IMPORTANT: initializeDefaultTestScreenConfig libraryName](#important-initializedefaulttestscreenconfig-libraryname)
       - [Other TestScreenConfig parameters](#other-testscreenconfig-parameters)
     - [Create screen tests](#create-screen-tests)
       - [Platform vs ThemeData.platform](#platform-vs-themedataplatform)
@@ -48,7 +56,7 @@ The Golden assertions take longer to execute than traditional widget tests, so i
       - [wrapWidget function](#wrapwidget-function)
       - [`WidgetTester` extension.](#widgettester-extension)
       - [ChildrenWithSomeOrderMatcher](#childrenwithsomeordermatcher)
-  - [3rd Party Software Included or Modified in Project](#3rd-party-software-included-or-modified-in-project)
+  - [3rd Party Software Included](#3rd-party-software-included)
 <!-- /code_chunk_output -->
 ## How it works?
 
@@ -186,10 +194,7 @@ Before a test file is executed, the Flutter test framework will scan up the dire
 Use `initializeDefaultTestScreenConfig` for creating the configuration:
 
 ```dart
-Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
-    {List<TestScreenFont> fonts = const [],
-    bool loadDefaultFonts = true,
-    String? libraryName})
+Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config, ...)
 ```
 
 `TestScreenConfig` class defines the locales and devices to test. 
@@ -322,30 +327,35 @@ The defaults values are:
 ```
 
 #### Fonts
-By default, all the fonts used in the project are loaded automatically and platform system fonts are simulated.
+By default, all the fonts used in the project are loaded automatically.
 
-`initializeDefaultTestScreenConfig` allows to fine tuning the fonts loaded.
+test_screen includes also simulated system fonts.
+
+`TestScreenConfig` allows to fine tuning the loaded fonts.
 
 ```dart
-Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
-    {List<TestScreenFont> fonts = const [],
-    bool loadDefaultFonts = true,
-    bool loadSimulatedPlatformFonts = true,
-    String? libraryName})
+TestScreenConfig(
+    {...
+      this.fonts = const [],
+      this.loadDefaultFonts = true,
+      this.loadSimulatedPlatformFonts = const {
+        SimulatedPlatformFonts.roboto,
+        SimulatedPlatformFonts.sfProText,
+      }
+    })
 ```
-- `fonts`: Load these fonts.
-- `loadDefaultFonts`: Controls if load all the fonts used in the project or not.
-- `loadSimulatedPlatformFonts`: loads simulated fonts for the different target platforms:
-    - Android: Roboto font.
-    - iOS: SFProDisplay and SFProText fonts.
-    - Other: Roboto font.
+- `fonts`: Loads these fonts.
+- `loadDefaultFonts`: Load all the fonts used in the project.
+- `loadSimulatedPlatformFonts`: A set of `SimulatedPlatformFonts` specifying what simulated fonts to load:
+    - Android: Roboto.
+    - iOS: SF Pro Display, SF Pro Text, SF UI Display, SF UI Text fonts.
+    - Other: Roboto.
   
-   For all the platforms, font family fallback loads NotoColorEmoji. This allows to show emojis.
-- `libraryName`: If the project is a library, specify the library name. If not specified, fonts declared in pubspec can't load it.
+   For all the platforms, font family fallback NotoColorEmoji. This allows to show emojis.
 
 
 ##### Understanding loadSimulatedPlatformFonts
-Different platforms, like Android or iOS, have system fonts. To simulate this system fonts, test_screen includes a series of fonts for simulating it. If `loadSimulatedPlatformFonts` is true (the default), these simulated fonts are loaded automatically.
+Different platforms, like Android or iOS, have system fonts. To simulate this system fonts, test_screen includes a series of fonts for simulating it. The fonts specified in `TestScreenConfig` `loadSimulatedPlatformFonts` are loaded automatically.
 
 For example in this code:
 ```dart
@@ -360,7 +370,13 @@ Column(
 ```
 Both Text font family defaults to system default. On Android font Roboto, on iOS font SF, ... 
 
-If `loadSimulatedPlatformFonts` = false, no system emulated fonts are loaded. 
+If `loadSimulatedPlatformFonts` is empty:
+```dart
+  TestScreenConfig(
+    loadSimulatedPlatformForms: const {}
+  );
+```
+no system emulated fonts are loaded. 
 
 Like system fonts aren't in your project, the result is:
 
@@ -382,15 +398,24 @@ Column(
               fontSize: 42))
   ])
 ```
-Like `loadDefaultFonts` = true, and the myAppFontFamily is in your project, font is loaded, given this result:
+and like `loadSimulatedPlatformFonts` is default to `SimulatedPlatformFonts.roboto` and `SimulatedPlatformFonts.sfProText`, and the myAppFontFamily is in your project, font is loaded, given this result:
 
-![loadSimulatedPlatformFonts false with fontFamily](resources/loadSimulatedPlatformFonts_false_text.png)
+![loadSimulatedPlatformFonts empty with fontFamily](resources/loadSimulatedPlatformFonts_false_text.png)
 
 What happen's with the emoji? Why is a rectangle?
 
 Like your font hasn't all the UTF codes supported, Flutter tries to paint it with the system default font for emojis, but how doesn't exist, it paints a rectangle.
 
-If `loadSimulatedPlatformFonts` = true, the system emulated fonts are loaded. Like the second Text with the emoticon isn't supported by your myAppFontFamily, it falls back to the system default font for emojis, that now, test_screen is emulating with the NotoColorEmoji font. The result is:
+If `loadSimulatedPlatformFonts` is configured like this:
+```dart
+  TestScreenConfig(
+    loadSimulatedPlatformForms: const {
+      SimulatedPlatformFonts.roboto,
+      SimulatedPlatformFonts.sfProText,
+      SimulatedPlatformFonts.notoColorEmoji}
+  );
+```
+ the system emulated NotoColorEmoji font is loaded. Like the second Text with the emoticon isn't supported by your myAppFontFamily, it falls back to the system default font for emojis, that now, test_screen is emulating with the NotoColorEmoji font. The result is:
 
 ![loadSimulatedPlatformFonts true with fontFamily](resources/loadSimulatedPlatformFonts_true_text.png)
 
@@ -409,11 +434,59 @@ will paint the Text with simulated fonts: First Text with Roboto for Android, SF
 
 ![loadSimulatedPlatformFonts true](resources/loadSimulatedPlatformFonts_true.png)
 
-###### What can loadSimulatedPlatformFonts = false be used for?
-If you want to find the texts that hasn't specified an application font family and falls on the default system fonts, put `loadSimulatedPlatformFonts` = false. 
+###### What purpose can be serve if loadSimulatedPlatformFonts is empty?
+
+To find texts that hasn't specified an application font family and falls on the default system fonts. 
 
 The texts appears with the default Ahem test font, and only see the rectangles.
 
+
+###### IMPORTANT: initializeDefaultTestScreenConfig simulatedPlatformFontsCacheDirectory
+
+```dart
+Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
+    {String? libraryName,
+    Directory? simulatedPlatformFontsCacheDirectory}) async {}
+```
+test_screen library is used like a development library, so it's declared in pubspec dev_dependencies.
+
+On previous versions of test_screen, simulated fonts were assets. Like test_screen is a development library, can imagine that the assets aren't included in release versions. But, Flutter has an open bug (https://github.com/flutter/flutter/issues/79261) for more than 4 years, where includes all the assets in the release version, even development libraries assets. This caused the final app to increase in size by more than 26MB, since the emoji font alone already weighed 23MB.
+
+To solve this problem, now test_screen doesn't include assets. All the fonts are embedded in code. This brings up another problem. Like every test loads the fonts from code, when uses the emoji font, a variable of 23MB is created. This, using Visual Studio Code, consumes all the memory of the PC and hangs it, because memory isn't released.
+
+To solve this problem, it is highly recommended to specify the argument `simulatedPlatformFontsCacheDirectory` on `initializeDefaultTestScreenConfig`. This directory is used for extracting the fonts embedded in the code. Then the tests directly use the sources from that directory, so the tests are much faster and the memory problem is avoided.
+
+###### Loading emoji font only when needed
+
+Like load the emoji font is costly in time and resources, is recommended to load the emoji font only for the test that requires it.
+
+Use `TestScreenConfig.defaultConfigCopy` to copy the default configuration and add the emoji font:
+
+Example:
+```dart
+testScreenUI(
+      'emoji',
+      config: TestScreenConfig.defaultConfigCopy(
+          withLoadSimulatedPlatformFonts: {
+            SimulatedPlatformFonts.roboto,
+            SimulatedPlatformFonts.sFProText,
+            SimulatedPlatformFonts.notoColorEmoji
+          }),
+      () async => Center(
+            child: Text('Hola: 😀🤡'),
+          ));
+```
+
+
+##### IMPORTANT: initializeDefaultTestScreenConfig libraryName
+
+```dart
+Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
+    {String? libraryName,
+    Directory? simulatedPlatformFontsCacheDirectory}) async {}
+```
+
+- `libraryName`: If the project is a library, specify the library name. If not specified, fonts declared in pubspec can't load it.
 
 #### Other TestScreenConfig parameters
 For every test, `onBeforeCreate`, `wrapper` and `onAfterCreate` are called.
@@ -745,7 +818,7 @@ expect(
     find.byType(Widget2),
 ]));
 ```
-## 3rd Party Software Included or Modified in Project
-  - font_loader.dart from Golden Toolkit: https://pub.dev/packages/golden_toolkit
-  - Roboto Font File: Available at URL: https://github.com/google/fonts/tree/master/apache/roboto License: Available under Apache license at https://github.com/google/fonts/blob/master/apache/roboto/LICENSE.txt
+## 3rd Party Software Included
+  - Roboto Font file: Available at URL: https://github.com/google/fonts/tree/master/apache/roboto License: Available under Apache license at https://github.com/google/fonts/blob/master/apache/roboto/LICENSE.txt
   - SFProDisplay and SFProText Font Files: Available at URL: https://fontsfree.net
+  - Noto Color Emoji file: Available at URL: https://fonts.google.com/noto/specimen/Noto+Color+Emoji License: Available under SIL Open Font, Version 1.1 at https://fonts.google.com/noto/specimen/Noto+Color+Emoji/license

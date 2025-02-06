@@ -9,6 +9,7 @@ export 'src/children_with_same_order_matcher.dart'
     show ChildrenWithSomeOrderMatcher;
 export 'src/firebase_test_lab.dart'
     show AndroidFirebaseTestLab, IosFirebaseTestLab;
+export 'src/simulated_platform_fonts.dart' show SimulatedPlatformFonts;
 export 'src/test_screen.dart' show testScreen, testScreenUI;
 export 'src/test_screen_config.dart'
     show

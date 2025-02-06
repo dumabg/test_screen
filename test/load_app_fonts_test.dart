@@ -58,4 +58,25 @@ void main() {
       expect(listEquals(fileBytes, fontCreated), true);
     },
   );
+
+  test('Load app font emoji with cache', () async {
+    final config = TestScreenConfig.defaultConfigCopy(
+        withLoadSimulatedPlatformFonts: {
+          SimulatedPlatformFonts.notoColorEmoji
+        });
+    await initializeDefaultTestScreenConfig(config,
+        simulatedPlatformFontsCacheDirectory: Directory('lib/fonts'));
+  });
+
+  test('Load app font emoji and cache it', () async {
+    final config = TestScreenConfig.defaultConfigCopy(
+        withLoadSimulatedPlatformFonts: {
+          SimulatedPlatformFonts.notoColorEmoji
+        });
+    await initializeDefaultTestScreenConfig(config,
+        simulatedPlatformFontsCacheDirectory: Directory('.'));
+    final file = File('NotoColorEmoji-Regular.ttf');
+    expect(file.existsSync(), true);
+    file.deleteSync();
+  });
 }
