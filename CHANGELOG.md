@@ -1,3 +1,7 @@
+## 3.5.0
+* Simulated platform fonts refactoring for avoiding release problem.
+* Threshold
+
 ## 3.4.0
 * Added loadSimulatedPlatformFonts on TestScreenConfig.
 * Added NotoColorEmoji font for simulating system emojis text.
