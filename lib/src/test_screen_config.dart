@@ -119,6 +119,11 @@ class TestScreenConfig {
   /// This allows to use emojis.
   final Set<SimulatedPlatformFonts> loadSimulatedPlatformFonts;
 
+  /// Threshold in golden tests:
+  /// https://rows.com/blog/post/writing-a-localfilecomparator-with-threshold-for-flutter-golden-tests
+  /// Default to 2%.
+  final double threshold;
+
   TestScreenConfig(
       {required this.locales,
       required this.devices,
@@ -130,7 +135,8 @@ class TestScreenConfig {
       this.loadSimulatedPlatformFonts = const {
         SimulatedPlatformFonts.roboto,
         SimulatedPlatformFonts.sfProText,
-      }})
+      },
+      this.threshold = 0.02 / 100}) // 2%
       : assert(locales.isNotEmpty),
         assert(devices.isNotEmpty);
 

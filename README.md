@@ -20,6 +20,8 @@ The Golden assertions take longer to execute than traditional widget tests, so i
 
 - [Loading emoji font only when needed](#loading-emoji-font-only-when-needed)
 
+- [Threshold](#threshold)
+
 ## Table of Contents
 
 <!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=7 orderedList=false} -->
@@ -45,6 +47,7 @@ The Golden assertions take longer to execute than traditional widget tests, so i
           - [IMPORTANT: initializeDefaultTestScreenConfig simulatedPlatformFontsCacheDirectory](#important-initializedefaulttestscreenconfig-simulatedplatformfontscachedirectory)
           - [Loading emoji font only when needed](#loading-emoji-font-only-when-needed)
         - [IMPORTANT: initializeDefaultTestScreenConfig libraryName](#important-initializedefaulttestscreenconfig-libraryname)
+      - [Threshold](#threshold)
       - [Other TestScreenConfig parameters](#other-testscreenconfig-parameters)
     - [Create screen tests](#create-screen-tests)
       - [Platform vs ThemeData.platform](#platform-vs-themedataplatform)
@@ -487,6 +490,16 @@ Future<void> initializeDefaultTestScreenConfig(TestScreenConfig config,
 ```
 
 - `libraryName`: If the project is a library, specify the library name. If not specified, fonts declared in pubspec can't load it.
+
+#### Threshold
+Sometimes, when reruns golden tests, Flutter doesn't paint exactly the same and the test fails.
+
+`TestScreenConfig` has the argument `threshold`. It controls the pixel diff percent accepted like a correct test. The default value is 0.02 (2%).
+
+You can read more details of this problem in:
+[https://rows.com/blog/post/writing-a-localfilecomparator-with-threshold-for-flutter-golden-tests](https://rows.com/blog/post/writing-a-localfilecomparator-with-threshold-for-flutter-golden-tests)
+
+
 
 #### Other TestScreenConfig parameters
 For every test, `onBeforeCreate`, `wrapper` and `onAfterCreate` are called.

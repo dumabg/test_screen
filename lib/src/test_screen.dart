@@ -15,6 +15,7 @@ import 'package:meta/meta.dart';
 import 'package:test_screen/src/font_loader.dart';
 import 'package:test_screen/test_screen.dart';
 
+import 'local_file_comparator_with_threshold.dart';
 import 'test_screen_config.dart';
 import 'ui_target_platform.dart';
 
@@ -132,16 +133,34 @@ void _internalTestScreen(
     }
   }
   group(description, () {
+    GoldenFileComparator? previousGoldenFileComparator;
     setUpAll(() async {
       TestWidgetsFlutterBinding.ensureInitialized();
+
+      previousGoldenFileComparator = goldenFileComparator;
+      final testUrl = (goldenFileComparator as LocalFileComparator).basedir;
+      goldenFileComparator = LocalFileComparatorWithThreshold(
+        // flutter_test's LocalFileComparator expects the test's URI as an
+        // argument, but it only uses it to parse the baseDir in order to
+        // obtain the directory where the golden tests will be placed.
+        // As such, we use the default `testUrl`, which is only the `baseDir`
+        // and append a generically named `test.dart` so that the `baseDir` is
+        // properly extracted.
+        Uri.parse('$testUrl/test.dart'),
+        config!.threshold,
+      );
+
       if (config != defaultTestScreenConfig) {
-        await loadAppFonts(config!);
+        await loadAppFonts(config);
       }
       fSetUpAll?.call();
     });
-    if (fTearDownAll != null) {
-      tearDownAll(fTearDownAll);
-    }
+    tearDownAll(() {
+      if (previousGoldenFileComparator != null) {
+        goldenFileComparator = previousGoldenFileComparator!;
+      }
+      fTearDownAll?.call();
+    });
     if (fSetUp != null) {
       setUp(fSetUp);
     }
