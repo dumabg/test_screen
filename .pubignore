@@ -1,2 +1,6 @@
 vsc_extension/
 example/test/screen
+build
+lib/fonts/*.ttf
+lib/fonts/trocea.sh
+lib/fonts/generate_list_int.py
