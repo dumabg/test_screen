@@ -5,7 +5,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:test_screen/fonts/notocoloremoji_regular_parts/notocoloremoji_regular.dart';
 import 'package:test_screen/src/font_loader.dart';
-import 'package:test_screen/src/simulated_platform_fonts.dart';
 import 'package:test_screen/src/test_screen_config.dart';
 import 'package:test_screen/test_screen.dart';
 
@@ -54,7 +53,7 @@ void main() {
     () async {
       final fileBytes =
           await File('lib/fonts/NotoColorEmoji-Regular.ttf').readAsBytes();
-      final fontCreated = font_notocoloremoji_regular();
+      final fontCreated = fontNotocoloremojiRegular();
       expect(listEquals(fileBytes, fontCreated), true);
     },
   );

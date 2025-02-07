@@ -138,8 +138,8 @@ Future<void> _loadSimulatedPlatformFonts(
       case SimulatedPlatformFonts.notoColorEmoji:
         final family = 'packages/test_screen/NotoColorEmoji';
         if (!_fontLoaderService.isLoaded(family)) {
-          final Uint8List font = _getFont(
-              'NotoColorEmoji-Regular.ttf', font_notocoloremoji_regular);
+          final Uint8List font =
+              _getFont('NotoColorEmoji-Regular.ttf', fontNotocoloremojiRegular);
           await _fontLoaderService.load(family, font);
         }
     }

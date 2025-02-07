@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:test_screen/src/simulated_platform_fonts.dart';
 import 'package:test_screen/test_screen.dart';
 
 import 'font_loader.dart';
